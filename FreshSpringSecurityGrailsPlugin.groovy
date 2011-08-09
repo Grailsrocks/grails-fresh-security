@@ -1,21 +1,31 @@
+//import org.grails.plugin.platform.config.PluginConfigurationEntry
+
+import com.grailsrocks.webprofile.security.*
+
 class FreshSpringSecurityGrailsPlugin {
     // the plugin version
-    def version = "0.1"
+    def version = "1.0.BUILD-SNAPSHOT"
     // the version or versions of Grails the plugin is designed for
-    def grailsVersion = "2.0 > *"
+    def grailsVersion = "1.3.7 > *"
     // the other plugins this plugin depends on
-    def dependsOn = [:]
+    def dependsOn = [
+        'grails-plugin-platform-core':'0.1 > *',
+        'spring-security-core':'1.1 > *'
+    ]
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
-        "grails-app/views/error.gsp"
+        "grails-app/views/error.gsp",
+        "grails-app/views/test.gsp"
     ]
 
+    def loadBefore = ['spring-security-core'] // We must apply out config before spring-sec loads its
+    
     // TODO Fill in these fields
     def title = "Fresh Spring Security Plugin" // Headline display name of the plugin
-    def author = "Your name"
-    def authorEmail = ""
+    def author = "Marc Palmer"
+    def authorEmail = "marc@grailsrocks.com"
     def description = '''\
-Brief summary/description of the plugin.
+Security that "just works", backed by Spring Security
 '''
 
     // URL to the plugin's documentation
@@ -43,11 +53,20 @@ Brief summary/description of the plugin.
     }
 
     def doWithSpring = {
-        // TODO Implement runtime spring config (optional)
+        userDetailsService(com.grailsrocks.webprofile.security.FreshSecurityUserDetailsService) {
+            grailsApplication = ref('grailsApplication')
+        }
     }
 
     def doWithDynamicMethods = { ctx ->
-        // TODO Implement registering dynamic methods to classes (optional)
+        def pc = ctx.grailsPluginConfiguration
+        def id = 'freshSpringSecurity'
+        /*
+        pc.register( [
+            [plugin:id, configKey:'com.grailsrocks.security.allowSignup', type:Boolean, defaultValue: true] as pce
+        ])
+        */
+        ctx.freshSecurityService.configureSpringSecurity()
     }
 
     def doWithApplicationContext = { applicationContext ->

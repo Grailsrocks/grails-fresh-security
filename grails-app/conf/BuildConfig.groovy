@@ -3,6 +3,8 @@ grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
 //grails.project.war.file = "target/${appName}-${appVersion}.war"
 
+//grails.plugin.'grails-plugin-platform-core' = '../../grails-plugin-platform/grails-plugin-platform-core'
+
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
@@ -14,7 +16,7 @@ grails.project.dependency.resolution = {
         grailsCentral()
         // uncomment the below to enable remote dependency resolution
         // from public Maven repositories
-        //mavenCentral()
+        mavenCentral()
         //mavenLocal()
         //mavenRepo "http://snapshots.repository.codehaus.org"
         //mavenRepo "http://repository.codehaus.org"
@@ -32,5 +34,6 @@ grails.project.dependency.resolution = {
               ":release:1.0.0.RC1") {
             export = false
         }
+//        build(':grails-plugin-platform-core:0.1')
     }
 }
