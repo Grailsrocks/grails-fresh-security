@@ -2,7 +2,7 @@
 
 import com.grailsrocks.webprofile.security.*
 
-class SpringSecurityGrailsPlugin {
+class SpringFreshSecurityGrailsPlugin {
     // the plugin version
     def version = "1.0.BUILD-SNAPSHOT"
     // the version or versions of Grails the plugin is designed for
