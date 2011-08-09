@@ -2,14 +2,14 @@
 
 import com.grailsrocks.webprofile.security.*
 
-class FreshSpringSecurityGrailsPlugin {
+class SpringSecurityGrailsPlugin {
     // the plugin version
     def version = "1.0.BUILD-SNAPSHOT"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.3.7 > *"
     // the other plugins this plugin depends on
     def dependsOn = [
-        'grails-plugin-platform-core':'0.1 > *',
+        'plugin-platform-core':'0.1 > *',
         'spring-security-core':'1.1 > *'
     ]
     // resources that are excluded from plugin packaging
