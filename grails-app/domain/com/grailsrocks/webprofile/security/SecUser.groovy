@@ -1,6 +1,6 @@
 package com.grailsrocks.webprofile.security
 
-class User {
+class SecUser {
     String userName
     
     String password
