@@ -34,14 +34,14 @@ class AuthController {
 			redirect uri: SpringSecurityUtils.securityConfig.successHandler.defaultTargetUrl
 		}
 		else {
-			redirect action: auth, params: params
+			redirect action: 'login', params: params
 		}
 	}
 
 	/**
 	 * Show the login page.
 	 */
-	def auth = {
+	def login = {
 
 		def config = SpringSecurityUtils.securityConfig
 
@@ -50,7 +50,7 @@ class AuthController {
 			return
 		}
 
-		String view = 'auth'
+		String view = 'login'
 		String postUrl = "${request.contextPath}${config.apf.filterProcessesUrl}"
 		render view: view, model: [postUrl: postUrl,
 		                           rememberMeParameter: config.rememberMe.parameter]
@@ -80,7 +80,7 @@ class AuthController {
 	 */
 	def full = {
 		def config = SpringSecurityUtils.securityConfig
-		render view: 'auth', params: params,
+		render view: 'login', params: params,
 			model: [hasCookie: authenticationTrustResolver.isRememberMe(SCH.context?.authentication),
 			        postUrl: "${request.contextPath}${config.apf.filterProcessesUrl}"]
 	}
@@ -116,7 +116,7 @@ class AuthController {
 		}
 		else {
 			flash.message = msg
-			redirect action: auth, params: params
+			redirect action: 'login', params: params
 		}
 	}
 
@@ -134,4 +134,9 @@ class AuthController {
 		render([error: 'access denied'] as JSON)
 	}
     
+    def signup = {
+    }
+
+    def doSignup = {
+    }
 }

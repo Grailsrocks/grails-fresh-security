@@ -15,7 +15,7 @@ class FreshSecurityTagLib {
     }
 
     def ifSignupAllowed = { attrs, body ->
-        if (grailsApplication.config.webprofile.spring.fresh.security.signupAllowed) {
+        if (grailsApplication.config.plugin.springFreshSecurity.signup.allowed) {
             out << body()
         }
     }
