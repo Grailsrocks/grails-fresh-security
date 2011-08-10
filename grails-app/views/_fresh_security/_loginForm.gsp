@@ -26,6 +26,9 @@
 
     <li>
         <input type="submit" name="submit" value="Login" tabindex="4" />
+        <fresh:ifSignupAllowed>
+        or <g:link controller="auth" action="signup">Sign up</g:link>
+        </fresh:ifSignupAllowed>
 
     </li>
 </ul>
