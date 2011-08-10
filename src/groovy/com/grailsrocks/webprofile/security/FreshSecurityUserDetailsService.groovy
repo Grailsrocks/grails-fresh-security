@@ -28,6 +28,7 @@ class FreshSecurityUserDetailsService implements GrailsUserDetailsService, Initi
     void afterPropertiesSet() {
         def conf = grailsApplication.config
         def clsname = conf.grails.plugins.springsecurity.userLookup.userDomainClassName
+        println "User classname is: ${clsname}"
         domainClass = grailsApplication.getDomainClass(clsname).clazz
     }
 

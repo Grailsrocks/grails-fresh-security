@@ -88,7 +88,7 @@ class AuthController {
 	/**
 	 * Callback after a failed login. Redirects to the auth page with a warning message.
 	 */
-	def authfail = {
+	def loginFail = {
 
 		def username = session[UsernamePasswordAuthenticationFilter.SPRING_SECURITY_LAST_USERNAME_KEY]
 		String msg = ''

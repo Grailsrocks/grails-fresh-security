@@ -1,6 +1,7 @@
-//import org.grails.plugin.platform.config.PluginConfigurationEntry
+import grails.plugins.springsecurity.SecurityConfigType
 
 import com.grailsrocks.webprofile.security.*
+import groovy.util.ConfigObject
 
 class SpringFreshSecurityGrailsPlugin {
     // the plugin version
@@ -18,7 +19,7 @@ class SpringFreshSecurityGrailsPlugin {
         "grails-app/views/test.gsp"
     ]
 
-    def loadBefore = ['spring-security-core'] // We must apply out config before spring-sec loads its
+    def loadAfter = ['springSecurityCore'] // We must apply our config before spring-sec loads its
     
     // TODO Fill in these fields
     def title = "Fresh Spring Security Plugin" // Headline display name of the plugin
@@ -49,24 +50,36 @@ Security that "just works", backed by Spring Security
 //    def scm = [ url: "http://svn.grails-plugins.codehaus.org/browse/grails-plugins/" ]
 
     def doWithWebDescriptor = { xml ->
-        // TODO Implement additions to web.xml (optional), this event occurs before
+        // Horror
+        SpringFreshSecurityGrailsPlugin.configureSpringSecurity(application.config)
     }
 
-    def doWithSpring = {
+    def doWithSpring = {        
         userDetailsService(com.grailsrocks.webprofile.security.FreshSecurityUserDetailsService) {
             grailsApplication = ref('grailsApplication')
         }
     }
 
     def doWithDynamicMethods = { ctx ->
-        def pc = ctx.grailsPluginConfiguration
-        def id = 'freshSpringSecurity'
-        /*
-        pc.register( [
-            [plugin:id, configKey:'com.grailsrocks.security.allowSignup', type:Boolean, defaultValue: true] as pce
-        ])
-        */
-        ctx.freshSecurityService.configureSpringSecurity()
+    }
+
+    static configureSpringSecurity(config) {
+        // Get our config values and use them to apply to Spring security's config by
+        // modifying global config
+        // This needs to be set as the default, that user can override usig our config
+        config.grails.plugins.springsecurity.interceptUrlMap = [
+           '/admin/**':     ['ROLE_ADMIN'],
+           '/static/**':    ['IS_AUTHENTICATED_ANONYMOUSLY'],
+           '/js/**':        ['IS_AUTHENTICATED_ANONYMOUSLY'],
+           '/css/**':       ['IS_AUTHENTICATED_ANONYMOUSLY'],
+           '/images/**':    ['IS_AUTHENTICATED_ANONYMOUSLY'],
+           '/auth/**':     ['IS_AUTHENTICATED_ANONYMOUSLY'],
+        ]
+        
+        config.grails.plugins.springsecurity.securityConfigType = SecurityConfigType.InterceptUrlMap
+        config.grails.plugins.springsecurity.userLookup.userDomainClassName = 'com.grailsrocks.webprofile.security.SecUser'
+        config.grails.plugins.springsecurity.userLookup.usernamePropertyName = 'userName'
+        config.grails.plugins.springsecurity.failureHandler.defaultFailureUrl = '/auth/loginFail?error='
     }
 
     def doWithApplicationContext = { applicationContext ->
