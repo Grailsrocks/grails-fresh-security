@@ -53,9 +53,6 @@ Security that "just works", backed by Spring Security
     }
 
     def doWithSpring = {        
-        // Horror
-        SpringFreshSecurityGrailsPlugin.configureSpringSecurity(application.config)
-
         userDetailsService(com.grailsrocks.webprofile.security.FreshSecurityUserDetailsService) {
             grailsApplication = ref('grailsApplication')
         }
@@ -70,31 +67,35 @@ Security that "just works", backed by Spring Security
         'post.login.always_default'(defaultValue:true)
     }
     
-    static configureSpringSecurity(config) {
-        // Get our config values and use them to apply to Spring security's config by
-        // modifying global config
-        // This needs to be set as the default, that user can override using our config
-        config.grails.plugins.springsecurity.interceptUrlMap = [
-           '/admin/**':     ['ROLE_ADMIN'],
-           '/static/**':    ['IS_AUTHENTICATED_ANONYMOUSLY'],
-           '/js/**':        ['IS_AUTHENTICATED_ANONYMOUSLY'],
-           '/css/**':       ['IS_AUTHENTICATED_ANONYMOUSLY'],
-           '/images/**':    ['IS_AUTHENTICATED_ANONYMOUSLY'],
-           '/auth/**':      ['IS_AUTHENTICATED_ANONYMOUSLY'],
-        ]
+    def doWithConfig = { config ->
+
+        application {
+            // Get our config values and use them to apply to Spring security's config by
+            // modifying global config
+            // This needs to be set as the default, that user can override using our config
+            grails.plugins.springsecurity.interceptUrlMap = [
+               '/admin/**':     ['ROLE_ADMIN'],
+               '/static/**':    ['IS_AUTHENTICATED_ANONYMOUSLY'],
+               '/js/**':        ['IS_AUTHENTICATED_ANONYMOUSLY'],
+               '/css/**':       ['IS_AUTHENTICATED_ANONYMOUSLY'],
+               '/images/**':    ['IS_AUTHENTICATED_ANONYMOUSLY'],
+               '/auth/**':      ['IS_AUTHENTICATED_ANONYMOUSLY'],
+            ]
         
-        config.grails.plugins.springsecurity.securityConfigType = SecurityConfigType.InterceptUrlMap
-        config.grails.plugins.springsecurity.userLookup.userDomainClassName = 'com.grailsrocks.webprofile.security.SecUser'
-        config.grails.plugins.springsecurity.userLookup.usernamePropertyName = 'userName'
-        config.grails.plugins.springsecurity.failureHandler.defaultFailureUrl = '/auth/loginFail?error='
-        config.grails.plugins.springsecurity.adh.errorPage = '/auth/denied'
+            grails.plugins.springsecurity.securityConfigType = SecurityConfigType.InterceptUrlMap
+            grails.plugins.springsecurity.userLookup.userDomainClassName = 'com.grailsrocks.webprofile.security.SecUser'
+            grails.plugins.springsecurity.userLookup.usernamePropertyName = 'userName'
+            grails.plugins.springsecurity.failureHandler.defaultFailureUrl = '/auth/loginFail?error='
+            grails.plugins.springsecurity.adh.errorPage = '/auth/denied'
 
-        config.grails.plugins.springsecurity.successHandler.defaultTargetUrl = 
-            config.plugin.springFreshSecurity.post.login.url
-        config.grails.plugins.springsecurity.successHandler.alwaysUseDefault = 
-            config.plugin.springFreshSecurity.post.login.always_default
+            grails.plugins.springsecurity.successHandler.defaultTargetUrl = 
+                config.plugin.springFreshSecurity.post.login.url
+            grails.plugins.springsecurity.successHandler.alwaysUseDefault = 
+                config.plugin.springFreshSecurity.post.login.always_default
+        }
+
     }
-
+    
     def doWithApplicationContext = { applicationContext ->
         // TODO Implement post initialization spring config (optional)
     }
