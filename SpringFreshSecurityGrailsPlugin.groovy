@@ -89,13 +89,10 @@ Security that "just works", backed by Spring Security
         config.grails.plugins.springsecurity.failureHandler.defaultFailureUrl = '/auth/loginFail?error='
         config.grails.plugins.springsecurity.adh.errorPage = '/auth/denied'
 
-        println "CONF has: ${config.plugin.springFreshSecurity.dump()}"
-/*
         config.grails.plugins.springsecurity.successHandler.defaultTargetUrl = 
             config.plugin.springFreshSecurity.post.login.url
         config.grails.plugins.springsecurity.successHandler.alwaysUseDefault = 
             config.plugin.springFreshSecurity.post.login.always_default
-*/
     }
 
     def doWithApplicationContext = { applicationContext ->
