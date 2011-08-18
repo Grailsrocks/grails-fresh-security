@@ -12,6 +12,7 @@ class FreshSecurityUserDetails implements UserDetails {
     final boolean accountNonExpired = true
     final boolean accountNonLocked = true
     final boolean credentialsNonExpired = true
+    final boolean credentialsNonLocked = true
     
     FreshSecurityUserDetails(userObj, authorities) {
         this.username = userObj.userName
@@ -20,6 +21,7 @@ class FreshSecurityUserDetails implements UserDetails {
         this.enabled = userObj.enabled
         this.accountNonExpired = !userObj.accountExpired
         this.accountNonLocked = !userObj.accountLocked
-        this.credentialsNonLocked = !userObj.credentialsLocked
+//        this.credentialsNonExpired = !userObj.credentialsExpired
+//        this.credentialsNonLocked = !userObj.credentialsLocked
     }
 }

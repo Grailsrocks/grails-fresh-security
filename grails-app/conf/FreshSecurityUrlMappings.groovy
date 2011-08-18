@@ -7,5 +7,8 @@ class FreshSecurityUrlMappings {
 				// apply constraints here
 			}
 		}
+		
+		"/test"(view:'test.gsp')
+		"/index"(view:'index.gsp')
 	}
 }

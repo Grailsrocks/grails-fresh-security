@@ -1,40 +1,24 @@
 <div class="signup-form">
 <p class="form-title"><g:message code="signup.form.title" encodeAs="HTML"/></p>
-<form method="post" id="loginForm" action="${createLinkTo(dir: 'j_spring_security_check')}">
+<g:form method="post" id="signupForm" url="[action:'doSignup', controller:'auth']">
+<bean:require beanName="form" className="com.grailsrocks.webprofile.security.forms.SignupFormCommand"/>
 <fieldset>
 <ul>
+    <li><bean:input beanName="form" property="userName"/></li>
+    <li><bean:input beanName="form" property="email"/></li>
+    <li><bean:input type="password" beanName="form" property="password"/></li>
+    <li><bean:input type="password" beanName="form" property="confirmPassword"/></li>
 
     <li>
-       <label for="j_username" class="desc">
-            Username <span class="req">*</span>
-        </label>
-        <input type="text" class="text medium" name="j_username" id="j_username" tabindex="1" />
-    </li>
-
-    <li>
-        <label for="j_password" class="desc">
-            Password <span class="req">*</span>
-        </label>
-        <input type="password" class="text medium" name="j_password" id="j_password" tabindex="2" />
-    </li>
-
-    <li>
-        <label for="j_password" class="desc">
-            Confirm password <span class="req">*</span>
-        </label>
-        <input type="password" class="text medium" name="j_password" id="j_password" tabindex="2" />
-    </li>
-
-    <li>
-        <input type="checkbox" class="checkbox" name="rememberMe" id="rememberMe" tabindex="3"/>
+        <input type="checkbox" class="checkbox" name="rememberMe" id="rememberMe" tabindex="4"/>
         <label for="rememberMe" class="choice">Remember Me</label>
     </li>
 
     <li>
-        <input type="submit" name="submit" value="Login" tabindex="4" />
+        <input type="submit" name="submit" value="Sign up" tabindex="5" />
 
     </li>
 </ul>
 </fieldset>
-</form>
+</g:form>
 </div>

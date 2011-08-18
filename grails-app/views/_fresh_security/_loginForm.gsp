@@ -5,17 +5,17 @@
 <ul>
 
     <li>
-       <label for="j_username" class="desc">
+       <label for="loginUser" class="desc">
             Username <span class="req">*</span>
         </label>
-        <input type="text" class="text medium" name="j_username" id="j_username" tabindex="1" />
+        <input type="text" name="user" id="loginUser" tabindex="1" />
     </li>
 
     <li>
-        <label for="j_password" class="desc">
+        <label for="loginPassword" class="desc">
             Password <span class="req">*</span>
         </label>
-        <input type="password" class="text medium" name="j_password" id="j_password" tabindex="2" />
+        <input type="password" name="password" id="loginPassword" tabindex="2" />
     </li>
 
 

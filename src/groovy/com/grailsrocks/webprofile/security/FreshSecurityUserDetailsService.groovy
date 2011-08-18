@@ -28,7 +28,6 @@ class FreshSecurityUserDetailsService implements GrailsUserDetailsService, Initi
     void afterPropertiesSet() {
         def conf = grailsApplication.config
         def clsname = conf.grails.plugins.springsecurity.userLookup.userDomainClassName
-        println "User classname is: ${clsname}"
         domainClass = grailsApplication.getDomainClass(clsname).clazz
     }
 
@@ -44,7 +43,9 @@ class FreshSecurityUserDetailsService implements GrailsUserDetailsService, Initi
             def user = domainClass.findByUserName(username)
             if (!user) throw new UsernameNotFoundException('User not found', username)
 
-            def authorities = user.authorities.collect {new GrantedAuthorityImpl(it.authority)}
+            def authorities = user.authorities.collect { a -> 
+                new GrantedAuthorityImpl(a) 
+            }
 
             return new FreshSecurityUserDetails(user, authorities)
         }

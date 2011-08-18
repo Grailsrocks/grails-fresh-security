@@ -2,8 +2,7 @@ package com.grailsrocks.webprofile.security
 
 import grails.converters.JSON
 
-import javax.servlet.http.HttpServletResponse
-
+import org.codehaus.groovy.grails.plugins.springsecurity.NullSaltSource
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 
 import org.springframework.security.authentication.AccountExpiredException
@@ -14,24 +13,23 @@ import org.springframework.security.core.context.SecurityContextHolder as SCH
 import org.springframework.security.web.WebAttributes
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 
+import com.grailsrocks.webprofile.security.forms.*
+
 class AuthController {
 
-	/**
-	 * Dependency injection for the authenticationTrustResolver.
-	 */
+    def saltSource
+    
 	def authenticationTrustResolver
 
-	/**
-	 * Dependency injection for the springSecurityService.
-	 */
 	def springSecurityService
 
-	/**
-	 * Default action; redirects to 'defaultTargetUrl' if logged in, /login/auth otherwise.
-	 */
+    def grailsApplication
+
+    def emailConfirmationService
+    
 	def index = {
 		if (springSecurityService.isLoggedIn()) {
-			redirect uri: SpringSecurityUtils.securityConfig.successHandler.defaultTargetUrl
+			redirect uri: grailsApplication.config.plugin.springFreshSecurity.post.login.url
 		}
 		else {
 			redirect action: 'login', params: params
@@ -90,6 +88,8 @@ class AuthController {
 	 */
 	def loginFail = {
 
+        // @todo make this not suck
+        
 		def username = session[UsernamePasswordAuthenticationFilter.SPRING_SECURITY_LAST_USERNAME_KEY]
 		String msg = ''
 		def exception = session[WebAttributes.AUTHENTICATION_EXCEPTION]
@@ -135,8 +135,84 @@ class AuthController {
 	}
     
     def signup = {
+        [form: new SignupFormCommand()]
     }
 
-    def doSignup = {
+    /**
+     * Perform signup. We need to support at least four different kinds of sign up:
+     *
+     * 1. Username + password, no email
+     * 2. Username + email + password, email confirmed or not
+     * 3. Email + password, email confirmed, username = email
+     * 4. Twitter/Facebook OAuth signup/auth
+     * 5. Open ID
+     */
+    def doSignup = { SignupFormCommand form ->
+        // @todo WTF move this to a service
+
+        if (log.debugEnabled) {
+            log.debug "User signing up: ${form.userName}"
+        }
+        
+        if (form.hasErrors()) {
+            if (log.debugEnabled) {
+                log.debug "User signing up, form has errors: ${form.userName}"
+            }
+            render(view:'signup', model:[form:form])
+            return
+        }
+        
+        boolean confirmEmail = grailsApplication.config.plugin.springFreshSecurity.confirm.email.on.signup
+        boolean lockedUntilConfirmEmail = grailsApplication.config.plugin.springFreshSecurity.confirm.account.locked.until.email.confirm
+        
+        String salt = saltSource instanceof NullSaltSource ? null : form.userName
+		String password = springSecurityService.encodePassword(form.password, salt)
+		def user = new SecUser(
+		        userName: form.userName,
+				password: password, 
+				email: form.email,
+				accountLocked: confirmEmail ? lockedUntilConfirmEmail : false, 
+				enabled: true,
+				roleList: grailsApplication.config.plugin.springFreshSecurity.'default'.roles)
+				
+		// @todo Look at providing hooks for other form variables not included in our SignupFormCommand
+		
+		if (!user.save()) {
+            if (log.debugEnabled) {
+                log.debug "User signing up, failed to save user: ${user.userName} - errors: ${user.errors}"
+            }
+            render(view:'signup', model:[form:form])
+		} else {
+            if (log.debugEnabled) {
+                log.debug "User signing up, saved user: ${user.userName}"
+            }
+		    if (confirmEmail) {
+                if (log.debugEnabled) {
+                    log.debug "User signing up, sending email confirmation: ${user.userName}"
+                }
+                if (emailConfirmationService) {
+    		        emailConfirmationService?.sendConfirmation()
+                } else {
+                    throw new IllegalArgumentException("Spring Fresh Security is configured to send email confirmations but the email-confirmation plugin is not installed")
+                }
+	        }
+	        session['spring.fresh.security.new.sign.up'] = true
+	        session['spring.fresh.security.email.confirm.pending'] = confirmEmail
+
+            println "WTF: ${grailsApplication.mainContext.userDetailsService}"
+            
+            // Force the new user to be logged in if email confirmation is not required
+            if (!confirmEmail) {
+                if (log.debugEnabled) {
+                    log.debug "User signing up, logging them in automatically: ${user.userName}"
+                }
+    		    springSecurityService.reauthenticate user.userName
+		    }
+
+            if (log.debugEnabled) {
+                log.debug "User signed up, redirecting to post signup url: ${user.userName}"
+            }
+	        redirect grailsApplication.config.plugin.springFreshSecurity.post.signup.url
+		}
     }
 }

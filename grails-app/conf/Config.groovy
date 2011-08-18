@@ -7,7 +7,9 @@ log4j = {
     //appenders {
     //    console name:'stdout', layout:pattern(conversionPattern: '%c{2} %m%n')
     //}
-    debug 'org.grails.plugin.platform', 'com.grailsrocks'
+    debug 'org.grails.plugin.platform', 
+          'com.grailsrocks',
+          'grails.app'
 
     error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
            'org.codehaus.groovy.grails.web.pages', //  GSP

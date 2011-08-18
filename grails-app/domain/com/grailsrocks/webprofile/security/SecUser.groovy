@@ -4,6 +4,7 @@ class SecUser {
     String userName
     
     String password
+    String roles
     
 	boolean enabled
 	boolean accountExpired
@@ -15,14 +16,21 @@ class SecUser {
     
     static constraints = {
         userName(unique:true)
+        roles(nullable: true)
     }
 
     void addRole(String s) {
         // call event
+        roles = roles + '|' + s
+    }
+    
+    void setRoleList(List<String> s) {
+        // call event
+        roles = s.join('|')
     }
     
 	Set<String> getAuthorities() {
-        // call event 
-        []
+        // call event ?
+        roles.tokenize('|') as Set
 	}
 }

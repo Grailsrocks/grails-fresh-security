@@ -2,6 +2,8 @@ import grails.plugins.springsecurity.SecurityConfigType
 
 import com.grailsrocks.webprofile.security.*
 import groovy.util.ConfigObject
+import org.codehaus.groovy.grails.plugins.PluginManagerHolder
+
 
 class SpringFreshSecurityGrailsPlugin {
     // the plugin version
@@ -19,7 +21,7 @@ class SpringFreshSecurityGrailsPlugin {
         "grails-app/views/test.gsp"
     ]
 
-    def loadBefore = ['springSecurityCore'] // We must apply our config before spring-sec loads its
+    def loadAfter = ['springSecurityCore'] // We must apply our beans AFTER spring-sec declares its own
     
     // TODO Fill in these fields
     def title = "Fresh Spring Security Plugin" // Headline display name of the plugin
@@ -56,14 +58,48 @@ Security that "just works", backed by Spring Security
         userDetailsService(com.grailsrocks.webprofile.security.FreshSecurityUserDetailsService) {
             grailsApplication = ref('grailsApplication')
         }
+        grailsSecurityProvider(com.grailsrocks.webprofile.security.FreshSecurityProvider)
     }
 
     def doWithDynamicMethods = { ctx ->
+        
+        // @todo upgrade email conf plugin to use events mechanism, if app uses email conf too, it will break us unless
+        // they delegate to us as well if uid is "fresh.security.signup"
+        if (ctx.emailConfirmationService) {
+            ctx.emailConfirmationService.onConfirmation = { email, uid ->
+                log.info("User with id $uid has confirmed their email address $email")
+                // now do something…
+                // Then return a map which will redirect the user to this destination
+                return ctx.grailsApplication.config.plugin.springFreshSecurity.post.signup.url
+            }
+            ctx.emailConfirmationService.onInvalid = { uid -> 
+                log.warn("User with id $uid failed to confirm email address after 30 days")
+            }
+            ctx.emailConfirmationService.onTimeout = { email, uid -> 
+                log.warn("User with id $uid failed to confirm email address after 30 days")
+            }
+        }
     }
 
     def doWithConfigOptions = { 
+        'guest.roles'(defaultValue:['ROLE_GUEST'], validator: { v -> 
+            (v == null || !(v instanceof List)) ? 'A role list is required' : null
+        })
+        'default.roles'(defaultValue:['ROLE_USER'], validator: { v -> 
+            (v == null || !(v instanceof List)) ? 'A role list is required' : null
+        })
         'signup.allowed'(defaultValue:true)
-        'post.login.url'(defaultValue:'/')
+        'post.signup.confirm.email'(defaultValue:true, validator: { v ->
+            if (v) {
+                def hasEmailConf = PluginManagerHolder.pluginManager.hasGrailsPlugin('email-confirmation')
+                return hasEmailConf ? null : 'Email-Confirmation plugin must be installed'
+            } else {
+                return null
+            }
+        })
+        'account.locked.until.email.confirm'(defaultValue:true)
+        'post.login.url'(defaultValue:[uri:'/'])
+        'post.signup.url'(defaultValue:[uri:'/'])
         'post.login.always_default'(defaultValue:true)
     }
     
@@ -80,6 +116,9 @@ Security that "just works", backed by Spring Security
                '/css/**':       ['IS_AUTHENTICATED_ANONYMOUSLY'],
                '/images/**':    ['IS_AUTHENTICATED_ANONYMOUSLY'],
                '/auth/**':      ['IS_AUTHENTICATED_ANONYMOUSLY'],
+               '/test':         ['IS_AUTHENTICATED_ANONYMOUSLY'],
+               '/index':        ['IS_AUTHENTICATED_ANONYMOUSLY'],
+               '/**':           ['IS_AUTHENTICATED_ANONYMOUSLY']
             ]
         
             grails.plugins.springsecurity.securityConfigType = SecurityConfigType.InterceptUrlMap
@@ -87,17 +126,24 @@ Security that "just works", backed by Spring Security
             grails.plugins.springsecurity.userLookup.usernamePropertyName = 'userName'
             grails.plugins.springsecurity.failureHandler.defaultFailureUrl = '/auth/loginFail?error='
             grails.plugins.springsecurity.adh.errorPage = '/auth/denied'
+            grails.plugins.springsecurity.auth.loginFormUrl = '/auth'
+            grails.plugins.springsecurity.apf.usernameParameter = "user"
+            grails.plugins.springsecurity.apf.passwordParameter = "password"
 
             grails.plugins.springsecurity.successHandler.defaultTargetUrl = 
                 config.plugin.springFreshSecurity.post.login.url
             grails.plugins.springsecurity.successHandler.alwaysUseDefault = 
                 config.plugin.springFreshSecurity.post.login.always_default
-        }
 
+            if (config.grails.validateable.packages instanceof List) {
+                config.grails.validateable.packages <<= 'com.grailsrocks.webprofile.security.forms'
+            } else {
+                config.grails.validateable.packages = ['com.grailsrocks.webprofile.security.forms']
+            }
+        }
     }
     
     def doWithApplicationContext = { applicationContext ->
-        // TODO Implement post initialization spring config (optional)
     }
 
     def onChange = { event ->
