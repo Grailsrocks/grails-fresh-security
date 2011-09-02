@@ -1,22 +1,18 @@
 package com.grailsrocks.webprofile.security
 
+import org.grails.plugin.platform.security.SecurityBridge
 
-class FreshSecurityProvider {
+class FreshSecurityProvider implements SecurityBridge {
     def springSecurityService
     def grailsApplication
     
-    def getUserId() {
+    String getUserName() {
         def princ = springSecurityService.principal
         if (princ instanceof String) {
             return null
         } else {
             return princ?.username   
         }
-    }
-
-    def getUserEmail() {
-        def princ = springSecurityService.principal
-        return (princ instanceof String) ? null : princ?.email   
     }
 
     /**
@@ -26,7 +22,7 @@ class FreshSecurityProvider {
         springSecurityService.principal 
     }
 
-    def userHasRole(role) {
+    boolean userHasRole(role) {
         def princ = springSecurityService.principal
         if (princ instanceof String) {
             return grailsApplication.config.plugin.springFreshSecurity.guest.roles
@@ -44,7 +40,11 @@ class FreshSecurityProvider {
      * @param object The object, typically domain but we don't care what
      * @param action Some application-defined action string i.e. "view" or "edit"
      */
-    def userIsAllowed(object, action) {
+    boolean userIsAllowed(object, action) {
         false // Not implemented yet
+    }
+    
+    String createLink(String action) {
+        "LINK HERE - NOT IMPLEMENTED"
     }
 }

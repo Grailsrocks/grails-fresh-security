@@ -1,11 +1,9 @@
-<!doctype html>
-<html>
+<g:html>
 	<head>
-		<title>Sign up</title>
-		<meta name="layout" content="main">
-		<link rel="stylesheet" href="${resource(dir: 'css', file: 'errors.css')}" type="text/css">
+		<title><g:message code="plugin.fresh.security.signup.screen.title"/></title>
+        <theme:layout name="fullscreen"/>
 	</head>
 	<body>
 	    <fresh:signupForm/>
 	</body>
-</html>
+</g:html>

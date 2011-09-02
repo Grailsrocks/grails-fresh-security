@@ -12,7 +12,7 @@ class SpringFreshSecurityGrailsPlugin {
     def grailsVersion = "1.3.7 > *"
     // the other plugins this plugin depends on
     def dependsOn = [
-        'pluginPlatformCore':'0.1 > *',
+        'pluginPlatform':'0.1 > *',
         'springSecurityCore':'1.1 > *'
     ]
     // resources that are excluded from plugin packaging
