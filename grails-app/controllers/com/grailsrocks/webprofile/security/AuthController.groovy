@@ -2,7 +2,6 @@ package com.grailsrocks.webprofile.security
 
 import grails.converters.JSON
 
-import org.codehaus.groovy.grails.plugins.springsecurity.NullSaltSource
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 
 import org.springframework.security.authentication.AccountExpiredException
@@ -17,16 +16,13 @@ import com.grailsrocks.webprofile.security.forms.*
 
 class AuthController {
 
-    def saltSource
-    
 	def authenticationTrustResolver
 
+    def freshSecurityService
 	def springSecurityService
 
     def grailsApplication
 
-    def emailConfirmationService
-    
 	def index = {
 		if (springSecurityService.isLoggedIn()) {
 			redirect uri: grailsApplication.config.plugin.springFreshSecurity.post.login.url
@@ -94,21 +90,7 @@ class AuthController {
 		String msg = ''
 		def exception = session[WebAttributes.AUTHENTICATION_EXCEPTION]
 		if (exception) {
-			if (exception instanceof AccountExpiredException) {
-				msg = SpringSecurityUtils.securityConfig.errors.login.expired
-			}
-			else if (exception instanceof CredentialsExpiredException) {
-				msg = SpringSecurityUtils.securityConfig.errors.login.passwordExpired
-			}
-			else if (exception instanceof DisabledException) {
-				msg = SpringSecurityUtils.securityConfig.errors.login.disabled
-			}
-			else if (exception instanceof LockedException) {
-				msg = SpringSecurityUtils.securityConfig.errors.login.locked
-			}
-			else {
-				msg = SpringSecurityUtils.securityConfig.errors.login.fail
-			}
+		    msg = g.message(code:"plugin.fresh.security."+exception.class.simpleName)
 		}
 
 		if (springSecurityService.isAjax(request)) {
@@ -162,57 +144,21 @@ class AuthController {
             return
         }
         
-        boolean confirmEmail = grailsApplication.config.plugin.springFreshSecurity.confirm.email.on.signup
-        boolean lockedUntilConfirmEmail = grailsApplication.config.plugin.springFreshSecurity.confirm.account.locked.until.email.confirm
-        
-        String salt = saltSource instanceof NullSaltSource ? null : form.userName
-		String password = springSecurityService.encodePassword(form.password, salt)
-		def user = new SecUser(
-		        userName: form.userName,
-				password: password, 
-				email: form.email,
-				accountLocked: confirmEmail ? lockedUntilConfirmEmail : false, 
-				enabled: true,
-				roleList: grailsApplication.config.plugin.springFreshSecurity.'default'.roles)
-				
+        def user = freshSecurityService.createNewUser(form, request)
+
 		// @todo Look at providing hooks for other form variables not included in our SignupFormCommand
 		
-		if (!user.save()) {
+		if (user.hasErrors()) {
             if (log.debugEnabled) {
                 log.debug "User signing up, failed to save user: ${user.userName} - errors: ${user.errors}"
             }
             render(view:'signup', model:[form:form])
 		} else {
             if (log.debugEnabled) {
-                log.debug "User signing up, saved user: ${user.userName}"
-            }
-		    if (confirmEmail) {
-                if (log.debugEnabled) {
-                    log.debug "User signing up, sending email confirmation: ${user.userName}"
-                }
-                if (emailConfirmationService) {
-    		        emailConfirmationService?.sendConfirmation()
-                } else {
-                    throw new IllegalArgumentException("Spring Fresh Security is configured to send email confirmations but the email-confirmation plugin is not installed")
-                }
-	        }
-	        session['spring.fresh.security.new.sign.up'] = true
-	        session['spring.fresh.security.email.confirm.pending'] = confirmEmail
-
-            println "WTF: ${grailsApplication.mainContext.userDetailsService}"
-            
-            // Force the new user to be logged in if email confirmation is not required
-            if (!confirmEmail) {
-                if (log.debugEnabled) {
-                    log.debug "User signing up, logging them in automatically: ${user.userName}"
-                }
-    		    springSecurityService.reauthenticate user.userName
-		    }
-
-            if (log.debugEnabled) {
                 log.debug "User signed up, redirecting to post signup url: ${user.userName}"
             }
-	        redirect grailsApplication.config.plugin.springFreshSecurity.post.signup.url
+            def postSignupUrl = grailsApplication.config.plugin.springFreshSecurity.post.signup.url
+	        redirect postSignupUrl
 		}
     }
 }

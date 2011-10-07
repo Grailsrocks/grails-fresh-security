@@ -7,6 +7,10 @@
 	</head>
 	<body>
 
+        <h1>Fresh Security Test</h1>
+        
+        <p>You are logged in as: <s:userName/></p>
+
 	    <fresh:loginForm/>
 
 	    <fresh:signupForm/>

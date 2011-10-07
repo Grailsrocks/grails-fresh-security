@@ -8,7 +8,6 @@ class FreshSecurityUrlMappings {
 			}
 		}
 		
-		"/test"(view:'test.gsp')
-		"/index"(view:'index.gsp')
+		"/test"(view:'test')
 	}
 }

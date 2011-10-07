@@ -58,7 +58,10 @@ Security that "just works", backed by Spring Security
         userDetailsService(com.grailsrocks.webprofile.security.FreshSecurityUserDetailsService) {
             grailsApplication = ref('grailsApplication')
         }
-        grailsSecurityProvider(com.grailsrocks.webprofile.security.FreshSecurityProvider)
+        grailsSecurityBridge(com.grailsrocks.webprofile.security.FreshSecurityProvider) {
+            springSecurityService = ref('springSecurityService')
+            grailsApplication = ref('grailsApplication')
+        }
     }
 
     def doWithDynamicMethods = { ctx ->

@@ -7,9 +7,8 @@ log4j = {
     //appenders {
     //    console name:'stdout', layout:pattern(conversionPattern: '%c{2} %m%n')
     //}
-    debug 'org.grails.plugin.platform', 
-          'com.grailsrocks',
-          'grails.app'
+    debug 'com.grailsrocks',
+          'grails.app.controller'
 
     error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
            'org.codehaus.groovy.grails.web.pages', //  GSP
@@ -28,6 +27,5 @@ log4j = {
 grails.views.default.codec="none" // none, html, base64
 grails.views.gsp.encoding="UTF-8"
 
-grails.theme.default.theme = 'grails'
-grails.theme.grails.layout.mapping.fullscreen = 'main'
+grails.theme.default.theme = 'Bootstrap'
 

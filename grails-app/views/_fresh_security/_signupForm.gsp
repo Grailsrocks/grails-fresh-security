@@ -1,24 +1,31 @@
-<div class="signup-form">
-<p class="form-title"><g:message code="signup.form.title" encodeAs="HTML"/></p>
-<g:form method="post" id="signupForm" url="[action:'doSignup', controller:'auth']">
 <bean:require beanName="form" className="com.grailsrocks.webprofile.security.forms.SignupFormCommand"/>
+<g:if test="${form.hasErrors()}">
+    <ui:message type="error"><p><g:message code="plugin.fresh.security.signup.screen.has.errors"/></p></ui:message>
+</g:if>
+<ui:form method="post" id="signupForm" url="[action:'doSignup', controller:'auth']">
+<bean:inputTemplate>
+    <ui:group error="${errors}">
+        <ui:label>${label}</ui:label>
+        <ui:field>${field}<g:if test="${errors}"><ui:fieldHint>${errors}</ui:fieldHint></g:if></ui:field>
+    </ui:group>
+</bean:inputTemplate>
 <fieldset>
-<ul>
-    <li><bean:input beanName="form" property="userName"/></li>
-    <li><bean:input beanName="form" property="email"/></li>
-    <li><bean:input type="password" beanName="form" property="password"/></li>
-    <li><bean:input type="password" beanName="form" property="confirmPassword"/></li>
+    <bean:input beanName="form" property="userName"/>
+    <bean:input beanName="form" property="email"/>
+    <bean:input type="password" beanName="form" property="password"/>
+    <bean:input type="password" beanName="form" property="confirmPassword"/>
 
-    <li>
-        <input type="checkbox" class="checkbox" name="rememberMe" id="rememberMe" tabindex="4"/>
-        <label for="rememberMe" class="choice">Remember Me</label>
-    </li>
+    <ui:group>
+        <ui:label>
+            <label for="rememberMe" class="choice">Remember Me</label>
+        </ui:label>
+        <ui:field>
+            <input type="checkbox" class="checkbox" name="rememberMe" id="rememberMe" tabindex="4"/>
+        </ui:field>
+    </ui:group>
 
-    <li>
-        <input type="submit" name="submit" value="Sign up" tabindex="5" />
-
-    </li>
-</ul>
+    <ui:actions>
+        <ui:button type="submit" mode="primary">Sign up</ui:button>
+    </ui:actions>
 </fieldset>
-</g:form>
-</div>
+</ui:form>
