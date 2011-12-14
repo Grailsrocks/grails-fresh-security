@@ -10,6 +10,7 @@ class SignupFormCommand {
     String email
     String password
     String confirmPassword
+    Boolean rememberMe
     
     def freshSecurityService
 
@@ -27,5 +28,6 @@ class SignupFormCommand {
         email(maxSize: 80, blank: false, email: true)
     	password(blank: false, minSize: 8, maxSize: 64, validator: CustomValidators.password)
         confirmPassword(validator: CustomValidators.confirmPassword)
+    	rememberMe(blank: true, nullable: true)
     }
 }
