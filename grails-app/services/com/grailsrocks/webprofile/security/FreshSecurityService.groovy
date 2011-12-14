@@ -36,7 +36,7 @@ class FreshSecurityService {
 
     @Transactional
     def createNewUser(userInfo, request = null) {
-        def conf = grailsApplication.config.plugin.springFreshSecurity
+        def conf = grailsApplication.config.plugin.freshSecurity
         boolean confirmEmail = conf.confirm.email.on.signup
         boolean lockedUntilConfirmEmail = conf.confirm.account.locked.until.email.confirm
         

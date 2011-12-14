@@ -25,7 +25,7 @@ class FreshSecurityProvider implements SecurityBridge {
     boolean userHasRole(role) {
         def princ = springSecurityService.principal
         if (princ instanceof String) {
-            return grailsApplication.config.plugin.springFreshSecurity.guest.roles
+            return grailsApplication.config.plugin.freshSecurity.guest.roles
         }
         def auths = []
         def authorities = princ?.authorities
