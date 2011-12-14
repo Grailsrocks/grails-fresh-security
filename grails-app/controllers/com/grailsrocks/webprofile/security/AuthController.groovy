@@ -25,14 +25,18 @@ class AuthController {
 
 	def index = {
 		if (springSecurityService.isLoggedIn()) {
-			redirect uri: grailsApplication.config.plugin.springFreshSecurity.post.login.url
+			redirect uri: grailsApplication.config.plugin.freshSecurity.post.login.url
 		}
 		else {
 			redirect action: 'login', params: params
 		}
 	}
 
-	/**
+    def logout = {
+        redirect(uri:'/j_spring_security_logout')
+    }
+	
+    /**
 	 * Show the login page.
 	 */
 	def login = {
@@ -44,23 +48,27 @@ class AuthController {
 			return
 		}
 
+        def userName = session['SPRING_SECURITY_LAST_USERNAME']
+        println "username from session: $userName"
+        
 		String view = 'login'
 		String postUrl = "${request.contextPath}${config.apf.filterProcessesUrl}"
-		render view: view, model: [postUrl: postUrl,
-		                           rememberMeParameter: config.rememberMe.parameter]
+		render( view: view, model: [
+		    postUrl: postUrl,
+		    loginForm: new LoginFormCommand(userName:userName),
+            rememberMeParameter: config.rememberMe.parameter])
 	}
 
-	/**
+	/*
 	 * The redirect action for Ajax requests. 
-	 */
 	def authAjax = {
 		response.setHeader 'Location', SpringSecurityUtils.securityConfig.auth.ajaxLoginFormUrl
 		response.sendError HttpServletResponse.SC_UNAUTHORIZED
 	}
-
-	/**
-	 * Show denied page.
 	 */
+
+	/*
+	 * Show denied page.
 	def denied = {
 		if (springSecurityService.isLoggedIn() &&
 				authenticationTrustResolver.isRememberMe(SCH.context?.authentication)) {
@@ -68,56 +76,58 @@ class AuthController {
 			redirect action: full, params: params
 		}
 	}
-
-	/**
-	 * Login page for users with a remember-me cookie but accessing a IS_AUTHENTICATED_FULLY page.
 	 */
+
+	/* @todo we need this
+	 * Login page for users with a remember-me cookie but accessing a IS_AUTHENTICATED_FULLY page.
 	def full = {
 		def config = SpringSecurityUtils.securityConfig
 		render view: 'login', params: params,
 			model: [hasCookie: authenticationTrustResolver.isRememberMe(SCH.context?.authentication),
 			        postUrl: "${request.contextPath}${config.apf.filterProcessesUrl}"]
 	}
+	 */
 
-	/**
+	/*
 	 * Callback after a failed login. Redirects to the auth page with a warning message.
 	 */
 	def loginFail = {
-
         // @todo make this not suck
         
 		def username = session[UsernamePasswordAuthenticationFilter.SPRING_SECURITY_LAST_USERNAME_KEY]
 		String msg = ''
 		def exception = session[WebAttributes.AUTHENTICATION_EXCEPTION]
 		if (exception) {
-		    msg = g.message(code:"plugin.fresh.security."+exception.class.simpleName)
+		    msg = "plugin.fresh.security."+exception.class.simpleName
 		}
 
 		if (springSecurityService.isAjax(request)) {
 			render([error: msg] as JSON)
 		}
 		else {
-			flash.message = msg
+			setUiMessage(msg)
 			redirect action: 'login', params: params
 		}
 	}
 
-	/**
+	/*
 	 * The Ajax success redirect url.
-	 */
 	def ajaxSuccess = {
 		render([success: true, username: springSecurityService.authentication.name] as JSON)
 	}
-
-	/**
-	 * The Ajax denied redirect url.
 	 */
+
+	/*
+	 * The Ajax denied redirect url.
 	def ajaxDenied = {
 		render([error: 'access denied'] as JSON)
 	}
-    
+	 */
+
+	/**
+     * Show the default dedicated signup screen
+     */
     def signup = {
-        [form: new SignupFormCommand()]
     }
 
     /**
@@ -130,7 +140,6 @@ class AuthController {
      * 5. Open ID
      */
     def doSignup = { SignupFormCommand form ->
-        // @todo WTF move this to a service
 
         if (log.debugEnabled) {
             log.debug "User signing up: ${form.userName}"
@@ -157,8 +166,13 @@ class AuthController {
             if (log.debugEnabled) {
                 log.debug "User signed up, redirecting to post signup url: ${user.userName}"
             }
-            def postSignupUrl = grailsApplication.config.plugin.springFreshSecurity.post.signup.url
+            def postSignupUrl = grailsApplication.config.plugin.freshSecurity.post.signup.url
+			setUiMessage('plugin.fresh.security.signup.complete')
 	        redirect postSignupUrl
 		}
+    }
+    
+    private void setUiMessage(String s) {
+        flash['plugin.fresh.security.message'] = s
     }
 }
