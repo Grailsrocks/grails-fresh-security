@@ -12,11 +12,27 @@ class FreshSecurityTagLib {
     }
     
     def logoutLink = { attrs, body ->
+		attrs.controller = "auth"
+		attrs.action = "logout"
+		out << g.link(attrs, body)
     }
 
     def ifSignupAllowed = { attrs, body ->
-        if (grailsApplication.config.plugin.springFreshSecurity.signup.allowed) {
+        if (grailsApplication.config.plugin.freshSecurity.signup.allowed) {
             out << body()
+        }
+    }
+    
+    def ifUiMessage = { attrs, body ->
+        if (flash['plugin.fresh.security.message']) {
+            out << body()
+        }
+    }
+
+    def uiMessage = { attrs ->
+        def msg = flash['plugin.fresh.security.message']
+        if (msg) {
+            out << g.message(code:msg, encodeAs:'HTML')
         }
     }
 }
