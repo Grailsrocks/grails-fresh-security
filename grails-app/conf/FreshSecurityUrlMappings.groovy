@@ -7,7 +7,5 @@ class FreshSecurityUrlMappings {
 				// apply constraints here
 			}
 		}
-		
-		"/test"(view:'test')
 	}
 }

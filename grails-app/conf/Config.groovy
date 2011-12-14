@@ -8,6 +8,7 @@ log4j = {
     //    console name:'stdout', layout:pattern(conversionPattern: '%c{2} %m%n')
     //}
     debug 'com.grailsrocks',
+          'org.grails.plugin.platform',
           'grails.app.controller'
 
     error  'org.codehaus.groovy.grails.web.servlet',  //  controllers

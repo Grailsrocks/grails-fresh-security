@@ -4,27 +4,25 @@ import com.grailsrocks.webprofile.security.*
 import groovy.util.ConfigObject
 import org.codehaus.groovy.grails.plugins.PluginManagerHolder
 
-
-class SpringFreshSecurityGrailsPlugin {
+class FreshSecurityGrailsPlugin {
     // the plugin version
     def version = "1.0.BUILD-SNAPSHOT"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.3.7 > *"
     // the other plugins this plugin depends on
     def dependsOn = [
-        'pluginPlatform':'0.1 > *',
-        'springSecurityCore':'1.1 > *'
+        'pluginPlatform':'1.0 > *',
+        'springSecurityCore':'1.2 > *'
     ]
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
         "grails-app/views/error.gsp",
-        "grails-app/views/test.gsp"
+        "grails-app/views/index.gsp"
     ]
 
     def loadAfter = ['springSecurityCore'] // We must apply our beans AFTER spring-sec declares its own
     
-    // TODO Fill in these fields
-    def title = "Fresh Spring Security Plugin" // Headline display name of the plugin
+    def title = "Fresh Security Plugin" // Headline display name of the plugin
     def author = "Marc Palmer"
     def authorEmail = "marc@grailsrocks.com"
     def description = '''\
@@ -32,24 +30,24 @@ Security that "just works", backed by Spring Security
 '''
 
     // URL to the plugin's documentation
-    def documentation = "http://grails.org/plugin/fresh-spring-security"
+    def documentation = "http://grails.org/plugin/fresh-security"
 
     // Extra (optional) plugin metadata
 
     // License: one of 'APACHE', 'GPL2', 'GPL3'
-//    def license = "APACHE"
+    def license = "APACHE"
 
     // Details of company behind the plugin (if there is one)
-//    def organization = [ name: "My Company", url: "http://www.my-company.com/" ]
+    def organization = [ name: "Grails Rocks", url: "http://grailsrocks.com/" ]
 
     // Any additional developers beyond the author specified above.
-//    def developers = [ [ name: "Joe Bloggs", email: "joe@bloggs.net" ]]
+    def developers = [ [ name: "Marc Palmer", email: "marc@grailsrocks.com" ]]
 
     // Location of the plugin's issue tracker.
-//    def issueManagement = [ system: "JIRA", url: "http://jira.grails.org/browse/GPMYPLUGIN" ]
+    def issueManagement = [ system: "JIRA", url: "http://jira.grails.org/browse/GPFRESHSECURITY" ]
 
     // Online location of the plugin's browseable source code.
-//    def scm = [ url: "http://svn.grails-plugins.codehaus.org/browse/grails-plugins/" ]
+    def scm = [ url: "http://github.com/grailsrocks/grails-fresh-security" ]
 
     def doWithWebDescriptor = { xml ->
     }
@@ -73,7 +71,7 @@ Security that "just works", backed by Spring Security
                 log.info("User with id $uid has confirmed their email address $email")
                 // now do something…
                 // Then return a map which will redirect the user to this destination
-                return ctx.grailsApplication.config.plugin.springFreshSecurity.post.signup.url
+                return ctx.grailsApplication.config.plugin.freshSecurity.post.signup.url
             }
             ctx.emailConfirmationService.onInvalid = { uid -> 
                 log.warn("User with id $uid failed to confirm email address after 30 days")
@@ -127,22 +125,26 @@ Security that "just works", backed by Spring Security
             grails.plugins.springsecurity.securityConfigType = SecurityConfigType.InterceptUrlMap
             grails.plugins.springsecurity.userLookup.userDomainClassName = 'com.grailsrocks.webprofile.security.SecUser'
             grails.plugins.springsecurity.userLookup.usernamePropertyName = 'userName'
-            grails.plugins.springsecurity.failureHandler.defaultFailureUrl = '/auth/loginFail?error='
+            grails.plugins.springsecurity.failureHandler.defaultFailureUrl = '/auth/loginFail'
             grails.plugins.springsecurity.adh.errorPage = '/auth/denied'
             grails.plugins.springsecurity.auth.loginFormUrl = '/auth'
-            grails.plugins.springsecurity.apf.usernameParameter = "user"
+            grails.plugins.springsecurity.apf.usernameParameter = "userName"
             grails.plugins.springsecurity.apf.passwordParameter = "password"
+            grails.plugins.springsecurity.rememberMe.parameter = "rememberMe"
 
             grails.plugins.springsecurity.successHandler.defaultTargetUrl = 
-                config.plugin.springFreshSecurity.post.login.url
+                config.plugin.freshSecurity.post.login.url
             grails.plugins.springsecurity.successHandler.alwaysUseDefault = 
-                config.plugin.springFreshSecurity.post.login.always_default
+                config.plugin.freshSecurity.post.login.always_default
+            // Lock down everything
+            grails.plugins.springsecurity.rejectIfNoRule = true
 
             if (config.grails.validateable.packages instanceof List) {
                 config.grails.validateable.packages <<= 'com.grailsrocks.webprofile.security.forms'
             } else {
                 config.grails.validateable.packages = ['com.grailsrocks.webprofile.security.forms']
             }
+            
         }
     }
     
