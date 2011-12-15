@@ -16,4 +16,4 @@
     	    <fresh:logoutLink>Log out</fresh:logoutLink>
 	    </theme:zone>
 	</body>
-</html>
+</html>	

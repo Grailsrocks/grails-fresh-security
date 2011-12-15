@@ -1,5 +1,8 @@
 package com.grailsrocks.webprofile.security
 
+/**
+ * The domain class encapsulating the user
+ */
 class SecUser {
     String userName
     
@@ -8,6 +11,7 @@ class SecUser {
     
 	boolean enabled
 	boolean accountExpired
+	boolean credentialsExpired
 	boolean accountLocked
 	boolean passwordExpired
     

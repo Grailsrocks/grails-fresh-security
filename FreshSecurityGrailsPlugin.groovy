@@ -98,7 +98,9 @@ Security that "just works", backed by Spring Security
                 return null
             }
         })
-        'account.locked.until.email.confirm'(defaultValue:true)
+        'identity.mode'(defaultValue:'userid', validator: { v -> v in ['email', 'userid'] ? null : 'Must be [email] or [userid]'} )
+        'password.reset.mode'(defaultValue:'setnew')
+        'confirm.email.on.signup'(defaultValue:true)
         'post.login.url'(defaultValue:[uri:'/'])
         'post.signup.url'(defaultValue:[uri:'/'])
         'post.login.always_default'(defaultValue:true)
@@ -117,7 +119,6 @@ Security that "just works", backed by Spring Security
                '/css/**':       ['IS_AUTHENTICATED_ANONYMOUSLY'],
                '/images/**':    ['IS_AUTHENTICATED_ANONYMOUSLY'],
                '/auth/**':      ['IS_AUTHENTICATED_ANONYMOUSLY'],
-               '/test':         ['IS_AUTHENTICATED_ANONYMOUSLY'],
                '/index':        ['IS_AUTHENTICATED_ANONYMOUSLY'],
                '/**':           ['IS_AUTHENTICATED_ANONYMOUSLY']
             ]
@@ -145,6 +146,13 @@ Security that "just works", backed by Spring Security
                 config.grails.validateable.packages = ['com.grailsrocks.webprofile.security.forms']
             }
             
+        }
+        
+        freshSecurity {
+            // Force confirm email to true if using email as id
+            if (config.plugin.freshSecurity.identity.mode == 'email') {
+                confirm.email.on.signup = true
+            }
         }
     }
     

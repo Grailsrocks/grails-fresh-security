@@ -20,8 +20,8 @@ class FreshSecurityUserDetails implements UserDetails {
         this.authorities = authorities
         this.enabled = userObj.enabled
         this.accountNonExpired = !userObj.accountExpired
+        this.credentialsNonExpired = !userObj.credentialsExpired
         this.accountNonLocked = !userObj.accountLocked
-//        this.credentialsNonExpired = !userObj.credentialsExpired
 //        this.credentialsNonLocked = !userObj.credentialsLocked
     }
 }
