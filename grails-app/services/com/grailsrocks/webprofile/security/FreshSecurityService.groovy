@@ -19,6 +19,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 class FreshSecurityService {
     static transactional = false
     
+    static final String CONFIRMATION_HANDLER_PASSWORDRESET = 'plugin.fresh.security.password.reset'
+    static final String CONFIRMATION_HANDLER_SIGNUP_CONFIRM = 'plugin.fresh.security.signup.confirm'
+    
     def saltSource
     def grailsApplication
     def springSecurityService
@@ -34,6 +37,17 @@ class FreshSecurityService {
         userClass.findByUserName(userName)
     }
 
+    void init() {
+        emailConfirmationService.addConfirmedHandler(CONFIRMATION_HANDLER_PASSWORDRESET) {
+            println "IN PASSWORD RESET HANDLER!"
+            [uri:'/']
+        }
+        emailConfirmationService.addConfirmedHandler(CONFIRMATION_HANDLER_SIGNUP_CONFIRM) {
+            println "IN SIGNUP CONFIRM!"
+            [uri:'/']
+        }
+    }
+    
     /**
      * Invalidate user's password so that the chosen reset flow starts.
      * Configuration determines reset flow, which can be one of "generate", "setnew" or "reminder"
@@ -60,11 +74,13 @@ class FreshSecurityService {
     }
 
     void sendUserPasswordResetNotification(user) {
-        def args = [
-            plugin:'fresh-security',
-            view:'/email-templates/need-to-set-new-password'
-        ]
-        emailConfirmationService.sendConfirmation(email, "Set your new password", args, user.userName)
+        emailConfirmationService.sendConfirmation(
+            to:email, 
+            subject:"Set your new password", 
+            plugin:'fresh-security', 
+            view:'/email-templates/password-reset-confirmation',
+            id:user.userName,
+            handler:CONFIRMATION_HANDLER_PASSWORDRESET)
     }
     
     def setUserAsLoggedIn(userName) {
@@ -119,15 +135,11 @@ class FreshSecurityService {
     }
 
     void sendSignupConfirmation(user) {
-        // @todo parameterize this somehow, with i18n
-        // @todo update email conf to have "purpose" or "reason" and attach name of an event sink to receive the notifications
-        // i.e. reason:'fresh.signup.confirm', handler:'fresh.signup.confirmer', id:user.userName, model:[:]
-        // use the reason as a convention to locate the view template?
-        def args = [
-            plugin:'fresh-security',
-            view:'/email-templates/signup-confirmation'
-        ]
-        emailConfirmationService.sendConfirmation(email, "Confirm your new account", args, user.userName)
+        emailConfirmationService.sendConfirmation(to:user.email, subject:"Confirm your new account", 
+            plugin:'fresh-security', 
+            view:'/email-templates/signup-confirmation',
+            id:user.userName,
+            handler:CONFIRMATION_HANDLER_SIGNUP_CONFIRM)
     }
     
     Class getUserClass() {

@@ -5,6 +5,8 @@ package com.grailsrocks.webprofile.security
  */
 class SecUser {
     String userName
+
+    String email
     
     String password
     String roles
@@ -19,7 +21,9 @@ class SecUser {
     Date lastUpdated
     
     static constraints = {
-        userName(unique:true)
+        userName(unique:true, nullable: false, blank: false, maxSize:80)
+        email(email:true, nullable: true, blank: false, maxSize:80)
+        password(nullable: false, blank: false, maxSize:80)
         roles(nullable: true)
     }
 

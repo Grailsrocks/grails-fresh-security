@@ -90,7 +90,7 @@ Security that "just works", backed by Spring Security
             (v == null || !(v instanceof List)) ? 'A role list is required' : null
         })
         'signup.allowed'(defaultValue:true)
-        'post.signup.confirm.email'(defaultValue:true, validator: { v ->
+        'confirm.email.on.signup'(defaultValue:false, validator: { v ->
             if (v) {
                 def hasEmailConf = PluginManagerHolder.pluginManager.hasGrailsPlugin('email-confirmation')
                 return hasEmailConf ? null : 'Email-Confirmation plugin must be installed'
@@ -100,7 +100,7 @@ Security that "just works", backed by Spring Security
         })
         'identity.mode'(defaultValue:'userid', validator: { v -> v in ['email', 'userid'] ? null : 'Must be [email] or [userid]'} )
         'password.reset.mode'(defaultValue:'setnew')
-        'confirm.email.on.signup'(defaultValue:true)
+        'account.locked.until.email.confirm'(defaultValue:'false')
         'post.login.url'(defaultValue:[uri:'/'])
         'post.signup.url'(defaultValue:[uri:'/'])
         'post.login.always_default'(defaultValue:true)
@@ -151,6 +151,9 @@ Security that "just works", backed by Spring Security
         freshSecurity {
             // Force confirm email to true if using email as id
             if (config.plugin.freshSecurity.identity.mode == 'email') {
+                confirm.email.on.signup = true
+            }
+            if (config.plugin.freshSecurity.account.locked.until.email.confirm) {
                 confirm.email.on.signup = true
             }
         }

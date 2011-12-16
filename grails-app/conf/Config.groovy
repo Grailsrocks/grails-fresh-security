@@ -30,3 +30,4 @@ grails.views.gsp.encoding="UTF-8"
 
 grails.theme.default.theme = 'Bootstrap'
 
+emailConfirmation.from = "test@somedomain.com"
