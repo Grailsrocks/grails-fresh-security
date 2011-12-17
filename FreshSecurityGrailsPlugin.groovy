@@ -153,7 +153,7 @@ Security that "just works", backed by Spring Security
             if (config.plugin.freshSecurity.identity.mode == 'email') {
                 confirm.email.on.signup = true
             }
-            if (config.plugin.freshSecurity.account.locked.until.email.confirm) {
+            if (config.plugin.freshSecurity.account.locked.until.email.confirm == 'email') {
                 confirm.email.on.signup = true
             }
         }

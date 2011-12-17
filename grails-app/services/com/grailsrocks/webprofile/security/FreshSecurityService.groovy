@@ -89,19 +89,19 @@ class FreshSecurityService {
     
     @Transactional
     def createNewUser(userInfo, request = null) {
-        def conf = grailsApplication.config.plugin.freshSecurity
-        boolean confirmEmail = conf.confirm.email.on.signup
-        boolean lockedUntilConfirmEmail = conf.confirm.account.locked.until.email.confirm
-        
+        boolean confirmEmail = pluginConfig.confirm.email.on.signup
+        boolean lockedUntilConfirmEmail = pluginConfig.account.locked.until.email.confirm
+         
         String salt = saltSource instanceof NullSaltSource ? null : userInfo.userName
 		String password = springSecurityService.encodePassword(userInfo.password, salt)
+		
 		def user = new SecUser(
-		        userName: userInfo.userName,
+		        userName: pluginConfig.identity.mode == 'email' ? userInfo.email : userInfo.userName,
 				password: password, 
 				email: userInfo.email,
-				accountLocked: confirmEmail ? lockedUntilConfirmEmail : false, 
+				accountLocked: lockedUntilConfirmEmail, 
 				enabled: true,
-				roleList: conf.'default'.roles)
+				roleList: pluginConfig.'default'.roles)
 				
 		if (user.save()) {
             if (log.debugEnabled) {

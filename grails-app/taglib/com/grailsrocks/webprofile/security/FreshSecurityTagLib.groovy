@@ -3,6 +3,8 @@ package com.grailsrocks.webprofile.security
 class FreshSecurityTagLib {
     static namespace = "fresh"
     
+    def grailsApplication
+    
     def loginForm = { attrs, body ->
         out << g.render(template:'/_fresh_security/loginForm')
     }
@@ -25,6 +27,12 @@ class FreshSecurityTagLib {
     
     def ifUiMessage = { attrs, body ->
         if (flash['plugin.fresh.security.message']) {
+            out << body()
+        }
+    }
+
+    def ifIdentityMode = { attrs, body ->
+        if (grailsApplication.config.plugin.freshSecurity.identity.mode == attrs.value) {
             out << body()
         }
     }
