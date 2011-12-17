@@ -33,7 +33,7 @@ class FreshSecurityService {
     }
 
     @Transactional
-    def findUserByUserName(userName) {
+    def findUserByIdentity(identity) {
         userClass.findByUserName(userName)
     }
 
@@ -85,6 +85,10 @@ class FreshSecurityService {
     
     def setUserAsLoggedIn(userName) {
         springSecurityService.reauthenticate userName
+    }
+    
+    def getIdentityField() {
+        pluginConfig.identity.mode == 'email' ? 'email' : 'userName'
     }
     
     @Transactional
