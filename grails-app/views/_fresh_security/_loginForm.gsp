@@ -7,12 +7,12 @@
 <fieldset>
      <ui:field bean="${loginForm}" name="userName" tabindex="1"/>
      <ui:field bean="${loginForm}" name="password" type="password" tabindex="2"/>
-     <ui:field bean="${loginForm}" name="rememberMe" tabindex="3"/>
+     <ui:field bean="${loginForm}" name="rememberMe" tabindex="3"/>
 
      <ui:actions>
-        <ui:button type="submit" tabindex="4">Log in</ui:button>
+        <ui:button type="submit" tabindex="4" text="action.auth.login"/>
         <fresh:ifSignupAllowed>
-        or <g:link controller="auth" action="signup">Sign up</g:link>
+        or <ui:link controller="auth" action="signup"/>
         </fresh:ifSignupAllowed>
      </ui:actions>
 </fieldset>

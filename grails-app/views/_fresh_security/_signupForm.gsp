@@ -9,11 +9,11 @@
     </fresh:ifIdentityMode>
     <ui:field bean="${form}" name="email" tabindex="2"/>
     <ui:field bean="${form}" name="password" type="password" tabindex="3"/>
-    <ui:field bean="${form}" name="confirmPassword" type="password" tabindex="3"/>
-    <ui:field bean="${form}" name="rememberMe" tabindex="4"/>
+    <ui:field bean="${form}" name="confirmPassword" type="password" tabindex="4"/>
+    <ui:field bean="${form}" name="rememberMe" tabindex="5"/>
 
     <ui:actions>
-        <ui:button type="submit" mode="primary">Sign up</ui:button>
+        <ui:button type="submit" mode="primary" text="action.auth.signup"/>
     </ui:actions>
 </fieldset>
 </ui:form>
