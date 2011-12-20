@@ -26,7 +26,7 @@ class FreshSecurityTagLib {
     }
     
     def ifUiMessage = { attrs, body ->
-        if (flash['plugin.fresh.security.message']) {
+        if (flash['plugin.freshSecurity.message']) {
             out << body()
         }
     }
@@ -38,7 +38,7 @@ class FreshSecurityTagLib {
     }
 
     def uiMessage = { attrs ->
-        def msg = flash['plugin.fresh.security.message']
+        def msg = flash['plugin.freshSecurity.message']
         if (msg) {
             out << g.message(code:msg, encodeAs:'HTML')
         }

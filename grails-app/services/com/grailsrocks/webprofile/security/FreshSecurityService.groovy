@@ -3,6 +3,7 @@ package com.grailsrocks.webprofile.security
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.springframework.transaction.annotation.*
 import org.codehaus.groovy.grails.plugins.springsecurity.NullSaltSource
+import org.springframework.beans.factory.InitializingBean
 
 /*
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
@@ -16,11 +17,15 @@ import org.springframework.security.web.WebAttributes
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 */
 
-class FreshSecurityService {
+class FreshSecurityService implements InitializingBean {
     static transactional = false
     
-    static final String CONFIRMATION_HANDLER_PASSWORDRESET = 'plugin.fresh.security.password.reset'
-    static final String CONFIRMATION_HANDLER_SIGNUP_CONFIRM = 'plugin.fresh.security.signup.confirm'
+    static final String PLUGIN_SCOPE = 'plugin.freshSecurity.'
+    static final String CONFIRMATION_HANDLER_PASSWORDRESET = PLUGIN_SCOPE+'password.reset'
+    static final String CONFIRMATION_HANDLER_SIGNUP_CONFIRM = PLUGIN_SCOPE+'signup.confirm'
+    
+    static final String SESSION_VAR_PASSWORD_RESET_MODE = PLUGIN_SCOPE+'password.reset.mode'
+    static final String SESSION_VAR_PASSWORD_RESET_IDENTITY = PLUGIN_SCOPE+'password.reset.identity'
     
     def saltSource
     def grailsApplication
@@ -28,23 +33,55 @@ class FreshSecurityService {
     def emailConfirmationService
     
     @Transactional
-    boolean userExists(userName) {
-		findUserByUserName(userName)
+    boolean userExists(identity) {
+		findUserByIdentity(identity)
     }
 
     @Transactional
     def findUserByIdentity(identity) {
-        userClass.findByUserName(userName)
+        userClass.findByUserName(identity)
     }
 
+    void afterPropertiesSet() {
+        init()
+    }
+    
     void init() {
-        emailConfirmationService.addConfirmedHandler(CONFIRMATION_HANDLER_PASSWORDRESET) {
-            println "IN PASSWORD RESET HANDLER!"
-            [uri:'/']
+        emailConfirmationService.addConfirmedHandler(CONFIRMATION_HANDLER_PASSWORDRESET) { args ->
+            handlePasswordResetConfirmation(args)
         }
-        emailConfirmationService.addConfirmedHandler(CONFIRMATION_HANDLER_SIGNUP_CONFIRM) {
-            println "IN SIGNUP CONFIRM!"
-            [uri:'/']
+        emailConfirmationService.addConfirmedHandler(CONFIRMATION_HANDLER_SIGNUP_CONFIRM) { args ->
+            handleSignupConfirmation(args)
+        }
+    }
+
+    /**
+     * Check user exists, then set session var to indicate that user is in "reset mode" and
+     * redirect to password set screen
+     */
+    @Transactional
+    def handlePasswordResetConfirmation(args) {
+        if (findUserByIdentity(args.id)) { 
+            args.request.session[SESSION_VAR_PASSWORD_RESET_MODE] = true
+            args.excludes 'spring-test'
+            .session[SESSION_VAR_PASSWORD_RESET_IDENTITY] = args.id
+            return [controller:'auth', action:'resetPassword']
+        } else {
+            return [controller:'auth', action:'badRequest']
+        }
+    }
+
+    /** 
+     * Mark their account as enabled, redirect them to login screen
+     */
+    @Transactional
+    def handleSignupConfirmation(args) {
+        def user = findUserByIdentity(args.id)
+        if (user) { 
+            user.accountLocked = false
+            return [controller:'auth', action:'firstLogin']
+        } else {
+            return [controller:'auth', action:'badRequest']
         }
     }
     
@@ -52,6 +89,7 @@ class FreshSecurityService {
      * Invalidate user's password so that the chosen reset flow starts.
      * Configuration determines reset flow, which can be one of "generate", "setnew" or "reminder"
      */
+    @Transactional
     void userForgotPassword(userName) {
 		def u = findUserByUserName(userName)
 		if (u) {
@@ -73,6 +111,17 @@ class FreshSecurityService {
         }
     }
 
+    @Transactional
+    void resetPassword(userId, String newPassword) {
+        def user = findUserByIdentity(userId)
+        if (user) {
+            user.password = encodePassword(user[identityField], newPassword)
+            user.save(flush:true) // Seems like a good plan, right?
+        } else {
+            throw new IllegalArgumentException("Cannot reset password, user not found")
+        }
+    }
+    
     void sendUserPasswordResetNotification(user) {
         emailConfirmationService.sendConfirmation(
             to:email, 
@@ -83,24 +132,29 @@ class FreshSecurityService {
             handler:CONFIRMATION_HANDLER_PASSWORDRESET)
     }
     
-    def setUserAsLoggedIn(userName) {
+    def setCurrentLoggedInUser(userName) {
         springSecurityService.reauthenticate userName
     }
     
     def getIdentityField() {
         pluginConfig.identity.mode == 'email' ? 'email' : 'userName'
     }
-    
+
+    def encodePassword(userInfo, String password) {
+        String salt = saltSource instanceof NullSaltSource ? null : userInfo.userName
+		springSecurityService.encodePassword(password, salt)
+    }
+
     @Transactional
     def createNewUser(userInfo, request = null) {
         boolean confirmEmail = pluginConfig.confirm.email.on.signup
         boolean lockedUntilConfirmEmail = pluginConfig.account.locked.until.email.confirm
          
-        String salt = saltSource instanceof NullSaltSource ? null : userInfo.userName
-		String password = springSecurityService.encodePassword(userInfo.password, salt)
+        def identity = pluginConfig.identity.mode == 'email' ? userInfo.email : userInfo.userName
+		String password = encodePassword(identity, userInfo.password)
 		
 		def user = new SecUser(
-		        userName: pluginConfig.identity.mode == 'email' ? userInfo.email : userInfo.userName,
+		        userName: identity,
 				password: password, 
 				email: userInfo.email,
 				accountLocked: lockedUntilConfirmEmail, 
@@ -131,7 +185,7 @@ class FreshSecurityService {
                 if (log.debugEnabled) {
                     log.debug "User signing up, logging them in automatically: ${user.userName}"
                 }
-    		    setUserAsLoggedIn(user.userName)
+    		    setCurrentLoggedInUser(user.userName)
 		    }
 		}
 

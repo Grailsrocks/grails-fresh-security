@@ -98,7 +98,7 @@ class AuthController {
 		String msg = ''
 		def exception = session[WebAttributes.AUTHENTICATION_EXCEPTION]
 		if (exception) {
-		    msg = "plugin.fresh.security."+exception.class.simpleName
+		    msg = "login.error."+exception.class.simpleName
 		}
 
 		if (springSecurityService.isAjax(request)) {
@@ -110,6 +110,37 @@ class AuthController {
 		}
 	}
 
+    def firstLogin = {
+        setUiMessage('first.login')
+    }
+    
+    def badRequest = {
+    }
+    
+    def resetPassword = {
+        if (!session[FreshSecurityService.SESSION_VAR_PASSWORD_RESET_MODE]) {
+            setUiMessage('password.reset.not.allowed')
+            redirect(action:'badRequest')
+        } 
+    }
+    
+    def doResetPassword = { PasswordResetFormCommand form ->
+        if (!session[FreshSecurityService.SESSION_VAR_PASSWORD_RESET_MODE]) {
+            setUiMessage('password.reset.not.allowed')
+            redirect(action:'badRequest')
+        } else {
+            if (!form.hasErrors()) {
+                freshSecurityService.resetPassword(session[FreshSecurityService.SESSION_VAR_PASSWORD_RESET_MODE], form.password)
+            } else {
+                setUiMessage('password.reset.invalid') 
+                // Blank out the password values
+                form.password = ''
+                form.confirmPassword = ''
+                render(view:'resetPassword', model:[form:form])
+            }
+        }
+    }
+    
 	/*
 	 * The Ajax success redirect url.
 	def ajaxSuccess = {
@@ -167,12 +198,12 @@ class AuthController {
                 log.debug "User signed up, redirecting to post signup url: ${user.userName}"
             }
             def postSignupUrl = grailsApplication.config.plugin.freshSecurity.post.signup.url
-			setUiMessage('plugin.fresh.security.signup.complete')
+			setUiMessage(user.accountLocked ? 'signup.confirm.required' : 'signup.complete')
 	        redirect postSignupUrl
 		}
     }
     
     private void setUiMessage(String s) {
-        flash['plugin.fresh.security.message'] = s
+        flash['plugin.freshSecurity.message'] = "plugin.freshSecurity."+s
     }
 }
