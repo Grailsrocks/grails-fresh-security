@@ -9,14 +9,14 @@ grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
         // uncomment to disable ehcache
-        // excludes 'ehcache'
+        excludes 'spring-test'
     }
     log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     repositories {
         grailsCentral()
         // uncomment the below to enable remote dependency resolution
         // from public Maven repositories
-        mavenCentral()
+        //mavenCentral()
         //mavenLocal()
         //mavenRepo "http://snapshots.repository.codehaus.org"
         //mavenRepo "http://repository.codehaus.org"
@@ -34,6 +34,16 @@ grails.project.dependency.resolution = {
               ":release:1.0.0.RC1") {
             export = false
         }
-//        build(':grails-plugin-platform-core:0.1')
+        build(':plugin-platform:1.0.BUILD-SNAPSHOT') {
+            excludes "spring-test"
+        }
+        runtime(':bean-fields:1.0.BUILD-SNAPSHOT') {
+            excludes "spring-test"
+        }
+            
+        runtime(':bootstrap-theme:1.0.BUILD-SNAPSHOT') {
+            export = false
+            excludes "spring-test"
+        }
     }
 }
