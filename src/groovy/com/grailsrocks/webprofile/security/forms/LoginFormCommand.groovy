@@ -13,7 +13,7 @@ class LoginFormCommand {
 
     static constraints = {
         userName(maxSize: 40, blank: false)
-    	password(blank: false, minSize: 8, maxSize: 64, validator: CustomValidators.password)
+    	password(blank: false, minSize: 8, maxSize: 64, validator: CustomValidators.passwordStrength)
     	rememberMe(blank: true, nullable: true)
     }
 }

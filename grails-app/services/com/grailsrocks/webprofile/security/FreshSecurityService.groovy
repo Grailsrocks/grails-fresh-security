@@ -1,9 +1,11 @@
 package com.grailsrocks.webprofile.security
 
+import grails.util.Environment
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
 import org.springframework.transaction.annotation.*
 import org.codehaus.groovy.grails.plugins.springsecurity.NullSaltSource
 import org.springframework.beans.factory.InitializingBean
+import org.springframework.web.context.request.RequestContextHolder
 
 /*
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
@@ -27,10 +29,14 @@ class FreshSecurityService implements InitializingBean {
     static final String SESSION_VAR_PASSWORD_RESET_MODE = PLUGIN_SCOPE+'password.reset.mode'
     static final String SESSION_VAR_PASSWORD_RESET_IDENTITY = PLUGIN_SCOPE+'password.reset.identity'
     
+    static final String PASSWORD_RESET_MODE_GENERATE = "generate"
+    static final String PASSWORD_RESET_MODE_SETNEW = "setnew"
+    
     def saltSource
     def grailsApplication
     def springSecurityService
     def emailConfirmationService
+    def grailsUiHelper
     
     @Transactional
     boolean userExists(identity) {
@@ -42,17 +48,18 @@ class FreshSecurityService implements InitializingBean {
         userClass.findByUserName(identity)
     }
 
+    @Transactional
+    def findUserByEmail(email) {
+        userClass.findByEmail(email)
+    }
+
     void afterPropertiesSet() {
         init()
     }
     
     void init() {
-        emailConfirmationService.addConfirmedHandler(CONFIRMATION_HANDLER_PASSWORDRESET) { args ->
-            handlePasswordResetConfirmation(args)
-        }
-        emailConfirmationService.addConfirmedHandler(CONFIRMATION_HANDLER_SIGNUP_CONFIRM) { args ->
-            handleSignupConfirmation(args)
-        }
+        emailConfirmationService.addConfirmedHandler(this.&handlePasswordResetConfirmation, CONFIRMATION_HANDLER_PASSWORDRESET)
+        emailConfirmationService.addConfirmedHandler(this.&handleSignupConfirmation, CONFIRMATION_HANDLER_SIGNUP_CONFIRM)
     }
 
     /**
@@ -62,9 +69,10 @@ class FreshSecurityService implements InitializingBean {
     @Transactional
     def handlePasswordResetConfirmation(args) {
         if (findUserByIdentity(args.id)) { 
-            args.request.session[SESSION_VAR_PASSWORD_RESET_MODE] = true
-            args.excludes 'spring-test'
-            .session[SESSION_VAR_PASSWORD_RESET_IDENTITY] = args.id
+            def session = RequestContextHolder.requestAttributes.session
+    	    
+            session[SESSION_VAR_PASSWORD_RESET_MODE] = true
+            session[SESSION_VAR_PASSWORD_RESET_IDENTITY] = args.id
             return [controller:'auth', action:'resetPassword']
         } else {
             return [controller:'auth', action:'badRequest']
@@ -79,9 +87,12 @@ class FreshSecurityService implements InitializingBean {
         def user = findUserByIdentity(args.id)
         if (user) { 
             user.accountLocked = false
-            return [controller:'auth', action:'firstLogin']
+            
+            grailsUiHelper.displayFlashMessage text:PLUGIN_SCOPE+'signup.confirm.completed'
+            
+            return pluginConfig.post.login.url
         } else {
-            return [controller:'auth', action:'badRequest']
+            return pluginConfig.bad.confirmation.url
         }
     }
     
@@ -90,24 +101,31 @@ class FreshSecurityService implements InitializingBean {
      * Configuration determines reset flow, which can be one of "generate", "setnew" or "reminder"
      */
     @Transactional
-    void userForgotPassword(userName) {
-		def u = findUserByUserName(userName)
+    boolean userForgotPassword(email) {
+        if (log.infoEnabled) {
+            log.info "User with email [${email}] requested a password reset"
+        }
+		def u = findUserByEmail(email)
 		if (u) {
 		    u.credentialsExpired = true
 		    u.save(flush:true)
-		} 
         
-        def resetMode = grailsApplication.config.plugin.freshSecurity.password.reset.mode
+            def resetMode = grailsApplication.config.plugin.freshSecurity.password.reset.mode
 
-        switch (resetMode) {
-            case FreshSecurityService.PASSWORD_RESET_MODE_GENERATE:
-                throw new IllegalArgumentException("Not implemented!")
-                break;
-            case FreshSecurityService.PASSWORD_RESET_MODE_SETNEW:
-                sendUserPasswordResetNotification(u)
-                break;
-            default:
-                throw new IllegalArgumentException("No password reset mode known with id [${resetMode}]")
+            switch (resetMode) {
+                case FreshSecurityService.PASSWORD_RESET_MODE_GENERATE:
+                    throw new IllegalArgumentException("Not implemented!")
+                    break;
+                case FreshSecurityService.PASSWORD_RESET_MODE_SETNEW:
+                    sendUserPasswordResetNotification(u)
+                    break;
+                default:
+                    throw new IllegalArgumentException("No password reset mode known with id [${resetMode}]")
+            }
+            
+            return true
+        } else {
+            return false
         }
     }
 
@@ -115,16 +133,22 @@ class FreshSecurityService implements InitializingBean {
     void resetPassword(userId, String newPassword) {
         def user = findUserByIdentity(userId)
         if (user) {
-            user.password = encodePassword(user[identityField], newPassword)
+            if (log.infoEnabled) {
+                log.info "Resetting password for user [${userId}]"
+            }
+            user.password = encodePassword(user.userName, newPassword)
             user.save(flush:true) // Seems like a good plan, right?
         } else {
+            if (log.infoEnabled) {
+                log.info "Could not reset password for user [${userId}], user not found"
+            }
             throw new IllegalArgumentException("Cannot reset password, user not found")
         }
     }
     
     void sendUserPasswordResetNotification(user) {
         emailConfirmationService.sendConfirmation(
-            to:email, 
+            to:user.email, 
             subject:"Set your new password", 
             plugin:'fresh-security', 
             view:'/email-templates/password-reset-confirmation',
@@ -147,8 +171,9 @@ class FreshSecurityService implements InitializingBean {
 
     @Transactional
     def createNewUser(userInfo, request = null) {
-        boolean confirmEmail = pluginConfig.confirm.email.on.signup
-        boolean lockedUntilConfirmEmail = pluginConfig.account.locked.until.email.confirm
+        boolean confirmBypass = (Environment.current == Environment.DEVELOPMENT) && userInfo.confirmBypass
+        boolean confirmEmail = pluginConfig.confirm.email.on.signup && !confirmBypass
+        boolean lockedUntilConfirmEmail = pluginConfig.account.locked.until.email.confirm && !confirmBypass
          
         def identity = pluginConfig.identity.mode == 'email' ? userInfo.email : userInfo.userName
 		String password = encodePassword(identity, userInfo.password)

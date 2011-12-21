@@ -1,7 +1,4 @@
 <g:requiresBean name="loginForm" class="com.grailsrocks.webprofile.security.forms.LoginFormCommand"/>
-<fresh:ifUiMessage>
-    <ui:message><fresh:uiMessage/></ui:message>
-</fresh:ifUiMessage>
 
 <ui:form method="post" id="loginForm" url="${createLinkTo(dir: '/j_spring_security_check')}">
 <fieldset>

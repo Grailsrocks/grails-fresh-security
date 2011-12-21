@@ -99,11 +99,12 @@ Security that "just works", backed by Spring Security
             }
         })
         'identity.mode'(defaultValue:'userid', validator: { v -> v in ['email', 'userid'] ? null : 'Must be [email] or [userid]'} )
-        'password.reset.mode'(defaultValue:'setnew')
+        'password.reset.mode'(defaultValue:'setnew', validator: { v -> v in ['setnew', 'generate'] ? null : 'Must be [setnew] or [generate]'})
         'account.locked.until.email.confirm'(defaultValue:'false')
         'post.login.url'(defaultValue:[uri:'/'])
         'post.signup.url'(defaultValue:[uri:'/'])
         'post.login.always_default'(defaultValue:true)
+        'bad.confirmation.url'(defaultValue:[uri:'/bad-confirmation'])
     }
     
     def doWithConfig = { config ->
@@ -133,10 +134,6 @@ Security that "just works", backed by Spring Security
             grails.plugins.springsecurity.apf.passwordParameter = "password"
             grails.plugins.springsecurity.rememberMe.parameter = "rememberMe"
 
-            grails.plugins.springsecurity.successHandler.defaultTargetUrl = 
-                config.plugin.freshSecurity.post.login.url
-            grails.plugins.springsecurity.successHandler.alwaysUseDefault = 
-                config.plugin.freshSecurity.post.login.always_default
             // Lock down everything
             grails.plugins.springsecurity.rejectIfNoRule = true
 

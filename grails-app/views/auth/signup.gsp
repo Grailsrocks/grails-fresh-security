@@ -6,6 +6,7 @@
 	<body>
         <ui:title text="signup.form.title"/>
 	    <theme:zone name="body">
+            <ui:displayMessage/>
 	        <fresh:signupForm/>
         </theme:zone>
 	</body>

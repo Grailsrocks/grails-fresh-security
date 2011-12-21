@@ -25,7 +25,7 @@ class AuthController {
 
 	def index = {
 		if (springSecurityService.isLoggedIn()) {
-			redirect uri: grailsApplication.config.plugin.freshSecurity.post.login.url
+		    goToPostLoginPage()
 		}
 		else {
 			redirect action: 'login', params: params
@@ -44,12 +44,11 @@ class AuthController {
 		def config = SpringSecurityUtils.securityConfig
 
 		if (springSecurityService.isLoggedIn()) {
-			redirect uri: config.successHandler.defaultTargetUrl
+		    goToPostLoginPage()
 			return
 		}
 
         def userName = session['SPRING_SECURITY_LAST_USERNAME']
-        println "username from session: $userName"
         
 		String view = 'login'
 		String postUrl = "${request.contextPath}${config.apf.filterProcessesUrl}"
@@ -98,43 +97,96 @@ class AuthController {
 		String msg = ''
 		def exception = session[WebAttributes.AUTHENTICATION_EXCEPTION]
 		if (exception) {
-		    msg = "login.error."+exception.class.simpleName
+		    msg = "error."+exception.class.simpleName
 		}
 
 		if (springSecurityService.isAjax(request)) {
 			render([error: msg] as JSON)
 		}
 		else {
-			setUiMessage(msg)
+            displayFlashMessage text:FreshSecurityService.PLUGIN_SCOPE+msg, type:'error'
 			redirect action: 'login', params: params
 		}
 	}
 
     def firstLogin = {
-        setUiMessage('first.login')
+        displayMessage text:FreshSecurityService.PLUGIN_SCOPE+'first.login', type:'info'
     }
     
     def badRequest = {
     }
     
+    def forgotPassword = { 
+    }
+
+    def doForgotPassword = { ForgotPasswordFormCommand form ->
+        if (log.infoEnabled) {
+            log.info "User submitted request for password reset with email [${form.email}]"
+        }
+        if (!form.hasErrors()) {
+            def emailKnown = freshSecurityService.userForgotPassword(form.email)
+            if (!emailKnown) {
+                if (log.warnEnabled) {
+                    log.warn "User forgot password but email [${form.email}] is not associated with any user account"
+                }
+                displayMessage text:FreshSecurityService.PLUGIN_SCOPE+'forgot.password.unknown.email'
+                render(view:'forgotPassword', model:[form:form])
+            } else {
+                if (log.infoEnabled) {
+                    log.info "User password reset confirmation mail sent to email [${form.email}]"
+                }
+                displayFlashMessage text:FreshSecurityService.PLUGIN_SCOPE+'password.reset.confirm.sent'
+                goToDefaultPage()
+            }
+        } else {
+            if (log.debugEnabled) {
+                log.debug "User forgot password but there were errors in their form: ${form.dump()}"
+            }
+            render(view:'forgotPassword', model:[forgotForm:form])
+        }
+    }
+
+    private void goToDefaultPage() {
+        redirect(pluginConfig.post.login.url)
+    }
+    
+    private void goToPostLoginPage() {
+        redirect(pluginConfig.post.login.url)
+    }
+    
     def resetPassword = {
         if (!session[FreshSecurityService.SESSION_VAR_PASSWORD_RESET_MODE]) {
-            setUiMessage('password.reset.not.allowed')
+            displayFlashMessage text:FreshSecurityService.PLUGIN_SCOPE+'password.reset.not.allowed', type:'error'
             redirect(action:'badRequest')
         } 
     }
     
     def doResetPassword = { PasswordResetFormCommand form ->
+        def userIdentity = session[FreshSecurityService.SESSION_VAR_PASSWORD_RESET_IDENTITY]
+        if (log.infoEnabled) {
+            log.info "Request to reset password for user [${userIdentity}]"
+        }
         if (!session[FreshSecurityService.SESSION_VAR_PASSWORD_RESET_MODE]) {
-            setUiMessage('password.reset.not.allowed')
+            if (log.infoEnabled) {
+                log.info "Request to reset password but user is not in reset mode"
+            }
+            displayFlashMessage text:FreshSecurityService.PLUGIN_SCOPE+'password.reset.not.allowed', type:'error'
             redirect(action:'badRequest')
         } else {
             if (!form.hasErrors()) {
-                freshSecurityService.resetPassword(session[FreshSecurityService.SESSION_VAR_PASSWORD_RESET_MODE], form.password)
+                if (log.infoEnabled) {
+                    log.info "Request to reset password for user [${userIdentity}] being processed"
+                }
+                freshSecurityService.resetPassword(userIdentity, form.newPassword)
+                session[FreshSecurityService.SESSION_VAR_PASSWORD_RESET_MODE] = false
+                goToPostLoginPage()
             } else {
-                setUiMessage('password.reset.invalid') 
+                if (log.infoEnabled) {
+                    log.info "Request to reset password for user [${userIdentity}] had errors"
+                }
+                displayMessage text:FreshSecurityService.PLUGIN_SCOPE+'password.reset.invalid', type:'error'
                 // Blank out the password values
-                form.password = ''
+                form.newPassword = ''
                 form.confirmPassword = ''
                 render(view:'resetPassword', model:[form:form])
             }
@@ -178,7 +230,7 @@ class AuthController {
         
         if (form.hasErrors()) {
             if (log.debugEnabled) {
-                log.debug "User signing up, form has errors: ${form.userName}"
+                log.debug "User signing up, form has errors: ${form.errors}"
             }
             render(view:'signup', model:[form:form])
             return
@@ -197,13 +249,9 @@ class AuthController {
             if (log.debugEnabled) {
                 log.debug "User signed up, redirecting to post signup url: ${user.userName}"
             }
-            def postSignupUrl = grailsApplication.config.plugin.freshSecurity.post.signup.url
-			setUiMessage(user.accountLocked ? 'signup.confirm.required' : 'signup.complete')
-	        redirect postSignupUrl
+            displayFlashMessage text:FreshSecurityService.PLUGIN_SCOPE+(user.accountLocked ? 'signup.confirm.required' : 'signup.complete'), 
+                type:'info'
+            goToPostLoginPage()
 		}
-    }
-    
-    private void setUiMessage(String s) {
-        flash['plugin.freshSecurity.message'] = "plugin.freshSecurity."+s
     }
 }

@@ -3,3 +3,4 @@ Your registration is almost complete. Just click the link below to confirm your 
 ${uri}
 
 Thanks
+<g:render template="/email-templates/footer"/>

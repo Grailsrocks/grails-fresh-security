@@ -1,12 +1,13 @@
 <html>
 	<head>
-		<title><g:message code="plugin.fresh.security.login.screen.title"/></title>
+		<title><g:message code="plugin.freshSecurity.login.screen.title"/></title>
         <theme:layout name="form"/>
 	</head>
 	<body>
-        <ui:title text="login.form.title"/>
+        <ui:title text="plugin.freshSecurity.login.form.title"/>
 	    <theme:zone name="body">
-	        <fresh:loginForm/>
+            <ui:displayMessage/>
+            <fresh:loginForm/>
         </theme:zone>
 	</body>
 </html>

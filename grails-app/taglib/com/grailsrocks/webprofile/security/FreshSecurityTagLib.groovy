@@ -13,10 +13,24 @@ class FreshSecurityTagLib {
         out << g.render(template:'/_fresh_security/signupForm')
     }
     
-    def logoutLink = { attrs, body ->
+    def forgotPasswordForm = { attrs, body ->
+        out << g.render(template:'/_fresh_security/forgotPasswordForm')
+    }
+    
+    def resetPasswordForm = { attrs, body ->
+        out << g.render(template:'/_fresh_security/resetPasswordForm')
+    }
+    
+    def logoutLink = { attrs ->
 		attrs.controller = "auth"
 		attrs.action = "logout"
-		out << g.link(attrs, body)
+		out << ui.link(attrs)
+    }
+
+    def resetPasswordLink = { attrs->
+		attrs.controller = "auth"
+		attrs.action = "forgotPassword"
+		out << ui.link(attrs)
     }
 
     def ifSignupAllowed = { attrs, body ->
@@ -26,7 +40,7 @@ class FreshSecurityTagLib {
     }
     
     def ifUiMessage = { attrs, body ->
-        if (flash['plugin.freshSecurity.message']) {
+        if (flash[FreshSecurityService.FLASH_VAR_UI_MESSAGE]) {
             out << body()
         }
     }
@@ -38,7 +52,7 @@ class FreshSecurityTagLib {
     }
 
     def uiMessage = { attrs ->
-        def msg = flash['plugin.freshSecurity.message']
+        def msg = flash[FreshSecurityService.FLASH_VAR_UI_MESSAGE]
         if (msg) {
             out << g.message(code:msg, encodeAs:'HTML')
         }
