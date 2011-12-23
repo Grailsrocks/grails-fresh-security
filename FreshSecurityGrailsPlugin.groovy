@@ -6,13 +6,13 @@ import org.codehaus.groovy.grails.plugins.PluginManagerHolder
 
 class FreshSecurityGrailsPlugin {
     // the plugin version
-    def version = "1.0.BUILD-SNAPSHOT"
+    def version = "1.0-SNAPSHOT"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.3.7 > *"
     // the other plugins this plugin depends on
     def dependsOn = [
         'pluginPlatform':'1.0 > *',
-        'springSecurityCore':'1.2 > *'
+        'springSecurityCore':'1.2.6 > *'
     ]
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
@@ -20,7 +20,7 @@ class FreshSecurityGrailsPlugin {
         "grails-app/views/index.gsp"
     ]
 
-    def loadAfter = ['springSecurityCore'] // We must apply our beans AFTER spring-sec declares its own
+    def loadAfter = ['springSecurityCore', 'emailConfirmation'] // We must apply our beans AFTER spring-sec declares its own
     
     def title = "Fresh Security Plugin" // Headline display name of the plugin
     def author = "Marc Palmer"

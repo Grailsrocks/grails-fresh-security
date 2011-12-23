@@ -34,12 +34,13 @@ grails.project.dependency.resolution = {
               ":release:1.0.0.RC1") {
             export = false
         }
-        build(':plugin-platform:1.0.BUILD-SNAPSHOT') {
+
+        build(':plugin-platform:1.0-SNAPSHOT') {
             excludes "spring-test"
         }
-        runtime(':bean-fields:1.0.BUILD-SNAPSHOT') {
-            excludes "spring-test"
-        }
+            
+        compile(':spring-security-core:1.2.6') 
+        compile(':email-confirmation:2.0-SNAPSHOT') 
             
         runtime(':bootstrap-theme:1.0.BUILD-SNAPSHOT') {
             export = false

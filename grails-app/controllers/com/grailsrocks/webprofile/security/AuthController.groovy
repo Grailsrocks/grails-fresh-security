@@ -179,6 +179,7 @@ class AuthController {
                 }
                 freshSecurityService.resetPassword(userIdentity, form.newPassword)
                 session[FreshSecurityService.SESSION_VAR_PASSWORD_RESET_MODE] = false
+                displayFlashMessage text:FreshSecurityService.PLUGIN_SCOPE+'password.reset.complete'
                 goToPostLoginPage()
             } else {
                 if (log.infoEnabled) {

@@ -34,7 +34,13 @@ class FreshSecurityTagLib {
     }
 
     def ifSignupAllowed = { attrs, body ->
-        if (grailsApplication.config.plugin.freshSecurity.signup.allowed) {
+        if (pluginConfig.signup.allowed) {
+            out << body()
+        }
+    }
+    
+    def ifNotConfirmSignup = { attrs, body ->
+        if (!pluginConfig.confirm.email.on.signup) {
             out << body()
         }
     }
@@ -46,7 +52,7 @@ class FreshSecurityTagLib {
     }
 
     def ifIdentityMode = { attrs, body ->
-        if (grailsApplication.config.plugin.freshSecurity.identity.mode == attrs.value) {
+        if (pluginConfig.identity.mode == attrs.value) {
             out << body()
         }
     }
