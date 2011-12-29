@@ -31,16 +31,17 @@ grails.project.dependency.resolution = {
 
     plugins {
         build(":tomcat:$grailsVersion",
-              ":release:1.0.0.RC1") {
+              ":release:1.0.0") {
             export = false
         }
 
-        build(':plugin-platform:1.0-SNAPSHOT') {
+        build(':plugin-platform:1.0.BUILD-SNAPSHOT') {
             excludes "spring-test"
         }
             
         compile(':spring-security-core:1.2.6') 
         compile(':email-confirmation:2.0-SNAPSHOT') 
+        compile ":resources:1.1.6"
             
         runtime(':bootstrap-theme:1.0.BUILD-SNAPSHOT') {
             export = false

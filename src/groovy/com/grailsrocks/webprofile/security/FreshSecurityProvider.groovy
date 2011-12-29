@@ -6,7 +6,7 @@ class FreshSecurityProvider implements SecurityBridge {
     def springSecurityService
     def grailsApplication
     
-    String getUserName() {
+    String getUserIdentity() {
         def princ = springSecurityService.principal
         if (princ instanceof String) {
             return null
@@ -45,6 +45,7 @@ class FreshSecurityProvider implements SecurityBridge {
     }
     
     String createLink(String action) {
+        // @todo christ this is a ballache pre-Grails 2.0
         "LINK HERE - NOT IMPLEMENTED"
     }
 }

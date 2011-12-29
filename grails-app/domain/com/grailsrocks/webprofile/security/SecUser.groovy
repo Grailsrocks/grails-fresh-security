@@ -20,11 +20,16 @@ class SecUser {
     Date dateCreated
     Date lastUpdated
     
+    String userObjectClassName
+    String userObjectId
+    
     static constraints = {
         userName(unique:true, nullable: false, blank: false, maxSize:80)
         email(email:true, nullable: true, blank: false, maxSize:80)
         password(nullable: false, blank: false, maxSize:80)
         roles(nullable: true)
+        userObjectClassName(nullable: true)
+        userObjectId(nullable: true)
     }
 
     void addRole(String s) {

@@ -14,7 +14,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.grailsrocks.webprofile.security.forms.*
 
-class AuthController {
+class FreshSecurityAuthController {
 
 	def authenticationTrustResolver
 
@@ -24,7 +24,7 @@ class AuthController {
     def grailsApplication
 
 	def index = {
-		if (springSecurityService.isLoggedIn()) {
+		if (securityUser) {
 		    goToPostLoginPage()
 		}
 		else {
@@ -43,7 +43,7 @@ class AuthController {
 
 		def config = SpringSecurityUtils.securityConfig
 
-		if (springSecurityService.isLoggedIn()) {
+		if (securityUser) {
 		    goToPostLoginPage()
 			return
 		}
@@ -212,6 +212,9 @@ class AuthController {
      * Show the default dedicated signup screen
      */
     def signup = {
+        if (!pluginConfig.signup.allowed) {
+            response.sendError(400, "No signups allowed")
+        }
     }
 
     /**
@@ -224,6 +227,10 @@ class AuthController {
      * 5. Open ID
      */
     def doSignup = { SignupFormCommand form ->
+        if (!pluginConfig.signup.allowed) {
+            response.sendError(400, "No signups allowed")
+            return
+        }
 
         if (log.debugEnabled) {
             log.debug "User signing up: ${form.userName}"

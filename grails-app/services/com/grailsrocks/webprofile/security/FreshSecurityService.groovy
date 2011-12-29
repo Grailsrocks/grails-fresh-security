@@ -156,7 +156,7 @@ class FreshSecurityService implements InitializingBean {
             handler:CONFIRMATION_HANDLER_PASSWORDRESET)
     }
     
-    def setCurrentLoggedInUser(userName) {
+    void setCurrentUser(userName) {
         springSecurityService.reauthenticate userName
     }
     
@@ -210,11 +210,37 @@ class FreshSecurityService implements InitializingBean {
                 if (log.debugEnabled) {
                     log.debug "User signing up, logging them in automatically: ${user.userName}"
                 }
-    		    setCurrentLoggedInUser(user.userName)
+                onNewUserSignedUp(user)
+                
+    		    setCurrentUser(user.userName)
 		    }
 		}
 
 		return user
+    }
+
+    void onNewUserSignedUp(user) {
+        if (log.infoEnabled) {
+            log.info "New user signed up: [${user.userName}]"
+        }
+        
+        def className = pluginConfig.user.object.class.name
+        if (className) {
+            if (log.infoEnabled) {
+                log.info "Creating new application user object for [${user.userName}] of type [${className}]"
+            }
+            def cls = grailsApplication.classLoader.loadClass(className)
+            def obj = cls.newInstance()
+
+            if (log.infoEnabled) {
+                log.debug "Populating new application user object for [${user.userName}] of type [${className}]..."
+            }
+            // @todo fire event here
+
+            obj.save(flush:true)
+            user.userObjectClassName = className
+            user.userObjectId = obj.ident().toString()
+        }
     }
 
     void sendSignupConfirmation(user) {

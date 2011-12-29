@@ -9,7 +9,7 @@
             
             <ui:displayMessage/>
         
-            <p>You are logged in as: <s:userName/></p>
+            <p>You are logged in as: <s:userIdentity/></p>
 
     	    <fresh:loginForm/>
 
