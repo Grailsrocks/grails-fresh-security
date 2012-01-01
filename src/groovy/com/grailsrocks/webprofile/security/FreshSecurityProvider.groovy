@@ -11,7 +11,7 @@ class FreshSecurityProvider implements SecurityBridge {
         if (princ instanceof String) {
             return null
         } else {
-            return princ?.username   
+            return princ?.identity   
         }
     }
 
@@ -19,7 +19,8 @@ class FreshSecurityProvider implements SecurityBridge {
      * Get user info object i.e. email address, other stuff defined by the application
      */
     def getUserInfo() {
-        springSecurityService.principal 
+        println "principal: "+springSecurityService.principal 
+        springSecurityService.principal instanceof String ? null : springSecurityService.principal
     }
 
     boolean userHasRole(role) {
@@ -44,8 +45,15 @@ class FreshSecurityProvider implements SecurityBridge {
         false // Not implemented yet
     }
     
-    String createLink(String action) {
-        // @todo christ this is a ballache pre-Grails 2.0
-        "LINK HERE - NOT IMPLEMENTED"
+    Map createLink(String action) {
+        def r = [controller:'freshSecurityAuth']
+        switch (action) {
+            case 'login': r.action = "login"; break;
+            case 'logout': r.action = "logout"; break;
+            case 'signup': r.action = "signup"; break;
+            default: 
+                throw new IllegalArgumentException('Security link [$action] is not recognized')
+        }
+        return r
     }
 }

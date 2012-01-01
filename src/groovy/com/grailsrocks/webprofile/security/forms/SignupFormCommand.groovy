@@ -6,7 +6,7 @@ import com.grailsrocks.webprofile.security.CustomValidators
 
 @Validateable
 class SignupFormCommand {
-    String userName
+    String identity
     String email
     String password
     String confirmPassword
@@ -17,7 +17,7 @@ class SignupFormCommand {
 
     static constraints = {
         // @todo externalize these constraints
-        userName(maxSize: 40, blank: false, validator: { value, command ->
+        identity(maxSize: 40, blank: false, validator: { value, command ->
 			if (value) {
 			    if (command.freshSecurityService.userExists(value)) {
 			        return 'username.taken'

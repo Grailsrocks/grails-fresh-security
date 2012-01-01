@@ -4,7 +4,7 @@ package com.grailsrocks.webprofile.security
  * The domain class encapsulating the user
  */
 class SecUser {
-    String userName
+    String identity
 
     String email
     
@@ -24,7 +24,7 @@ class SecUser {
     String userObjectId
     
     static constraints = {
-        userName(unique:true, nullable: false, blank: false, maxSize:80)
+        identity(unique:true, nullable: false, blank: false, maxSize:80)
         email(email:true, nullable: true, blank: false, maxSize:80)
         password(nullable: false, blank: false, maxSize:80)
         roles(nullable: true)
@@ -45,5 +45,10 @@ class SecUser {
 	Set<String> getAuthorities() {
         // call event ?
         roles.tokenize('|') as Set
+	}
+	
+	void setUserObject(obj) {
+	    userObjectClassName = obj?.class.name
+	    userObjectId = obj?.ident()
 	}
 }

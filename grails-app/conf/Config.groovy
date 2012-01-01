@@ -9,7 +9,8 @@ log4j = {
     //}
     debug 'com.grailsrocks',
           'org.grails.plugin.platform',
-          'grails.app.controller'
+          'grails.app.controller',
+          'grails.app.service'
 
     error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
            'org.codehaus.groovy.grails.web.pages', //  GSP
@@ -30,4 +31,3 @@ grails.views.gsp.encoding="UTF-8"
 
 grails.theme.default.theme = 'Bootstrap'
 
-emailConfirmation.from = "test@somedomain.com"

@@ -3,7 +3,10 @@ package com.grailsrocks.webprofile.security
 class FreshSecurityTagLib {
     static namespace = "fresh"
     
+    static returnObjectForTags = ['userObject']
+
     def grailsApplication
+    def grailsSecurity
     
     def loginForm = { attrs, body ->
         out << g.render(template:'/_fresh_security/loginForm')
@@ -19,6 +22,15 @@ class FreshSecurityTagLib {
     
     def resetPasswordForm = { attrs, body ->
         out << g.render(template:'/_fresh_security/resetPasswordForm')
+    }
+
+    def userObject = { attrs ->
+        def uinf = grailsSecurity.userInfo
+        if (uinf) {
+            return uinf.userObject
+        } else {
+            return Collections.EMPTY_MAP
+        }
     }
     
     def logoutLink = { attrs ->

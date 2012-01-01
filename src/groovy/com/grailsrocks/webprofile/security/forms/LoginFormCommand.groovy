@@ -6,13 +6,13 @@ import com.grailsrocks.webprofile.security.CustomValidators
 
 @Validateable
 class LoginFormCommand {
-    String userName
+    String identity
     String password
     Boolean rememberMe
     def freshSecurityService
 
     static constraints = {
-        userName(maxSize: 40, blank: false)
+        identity(maxSize: 40, blank: false)
     	password(blank: false, minSize: 8, maxSize: 64, validator: CustomValidators.passwordStrength)
     	rememberMe(blank: true, nullable: true)
     }

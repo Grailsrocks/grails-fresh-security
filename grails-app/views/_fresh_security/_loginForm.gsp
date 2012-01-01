@@ -2,7 +2,7 @@
 
 <ui:form method="post" id="loginForm" url="${createLinkTo(dir: '/j_spring_security_check')}">
 <fieldset>
-     <ui:field bean="${loginForm}" name="userName" tabindex="1"/>
+     <ui:field bean="${loginForm}" name="identity" tabindex="1"/>
      <ui:field bean="${loginForm}" name="password" type="password" tabindex="2"/>
      <ui:field bean="${loginForm}" name="rememberMe" tabindex="3"/>
 

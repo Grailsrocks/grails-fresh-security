@@ -45,7 +45,7 @@ class FreshSecurityService implements InitializingBean {
 
     @Transactional
     def findUserByIdentity(identity) {
-        userClass.findByUserName(identity)
+        userClass.findByIdentity(identity)
     }
 
     @Transactional
@@ -88,6 +88,8 @@ class FreshSecurityService implements InitializingBean {
         if (user) { 
             user.accountLocked = false
             
+            onNewUserSignedUp(user)
+
             grailsUiHelper.displayFlashMessage text:PLUGIN_SCOPE+'signup.confirm.completed'
             
             return pluginConfig.post.login.url
@@ -136,7 +138,7 @@ class FreshSecurityService implements InitializingBean {
             if (log.infoEnabled) {
                 log.info "Resetting password for user [${userId}]"
             }
-            user.password = encodePassword(user.userName, newPassword)
+            user.password = encodePassword(user.identity, newPassword)
             user.save(flush:true) // Seems like a good plan, right?
         } else {
             if (log.infoEnabled) {
@@ -152,34 +154,34 @@ class FreshSecurityService implements InitializingBean {
             subject:"Set your new password", 
             plugin:'fresh-security', 
             view:'/email-templates/password-reset-confirmation',
-            id:user.userName,
+            id:user.identity,
             handler:CONFIRMATION_HANDLER_PASSWORDRESET)
     }
     
-    void setCurrentUser(userName) {
-        springSecurityService.reauthenticate userName
+    void setCurrentUser(identity) {
+        springSecurityService.reauthenticate identity
     }
     
-    def getIdentityField() {
-        pluginConfig.identity.mode == 'email' ? 'email' : 'userName'
-    }
-
     def encodePassword(userInfo, String password) {
-        String salt = saltSource instanceof NullSaltSource ? null : userInfo.userName
+        String salt = saltSource instanceof NullSaltSource ? null : userInfo.identity
 		springSecurityService.encodePassword(password, salt)
     }
 
     @Transactional
     def createNewUser(userInfo, request = null) {
+        def identity = pluginConfig.identity.mode == 'email' ? userInfo.email : userInfo.identity
+        if (log.debugEnabled) {
+            log.debug "Creating new user ${identity}..."
+        }
+        
         boolean confirmBypass = (Environment.current == Environment.DEVELOPMENT) && userInfo.confirmBypass
         boolean confirmEmail = pluginConfig.confirm.email.on.signup && !confirmBypass
         boolean lockedUntilConfirmEmail = pluginConfig.account.locked.until.email.confirm && !confirmBypass
          
-        def identity = pluginConfig.identity.mode == 'email' ? userInfo.email : userInfo.userName
 		String password = encodePassword(identity, userInfo.password)
 		
 		def user = new SecUser(
-		        userName: identity,
+		        identity: identity,
 				password: password, 
 				email: userInfo.email,
 				accountLocked: lockedUntilConfirmEmail, 
@@ -188,11 +190,11 @@ class FreshSecurityService implements InitializingBean {
 				
 		if (user.save()) {
             if (log.debugEnabled) {
-                log.debug "User signing up, saved user: ${user.userName}"
+                log.debug "User signing up, saved user: ${user.identity}"
             }
 		    if (confirmEmail) {
                 if (log.debugEnabled) {
-                    log.debug "User signing up, sending email confirmation: ${user.userName}"
+                    log.debug "User signing up, sending email confirmation: ${user.identity}"
                 }
                 if (emailConfirmationService) {
                     sendSignupConfirmation(user)
@@ -208,36 +210,42 @@ class FreshSecurityService implements InitializingBean {
             // Force the new user to be logged in if email confirmation is not required
             if (!confirmEmail) {
                 if (log.debugEnabled) {
-                    log.debug "User signing up, logging them in automatically: ${user.userName}"
+                    log.debug "User signing up, logging them in automatically: ${user.identity}"
                 }
                 onNewUserSignedUp(user)
                 
-    		    setCurrentUser(user.userName)
+    		    setCurrentUser(user.identity)
 		    }
 		}
 
 		return user
     }
 
+    @Transactional
     void onNewUserSignedUp(user) {
         if (log.infoEnabled) {
-            log.info "New user signed up: [${user.userName}]"
+            log.info "New user signed up: [${user.identity}]"
         }
         
         def className = pluginConfig.user.object.class.name
+        def obj
         if (className) {
             if (log.infoEnabled) {
-                log.info "Creating new application user object for [${user.userName}] of type [${className}]"
+                log.info "Creating new application user object for [${user.identity}] of type [${className}]"
             }
             def cls = grailsApplication.classLoader.loadClass(className)
-            def obj = cls.newInstance()
+            obj = cls.newInstance()
+        }
+        
+    
+        if (log.infoEnabled) {
+            log.debug "Populating new application user object for [${user.identity}] of type [${className}]..."
+        }
 
-            if (log.infoEnabled) {
-                log.debug "Populating new application user object for [${user.userName}] of type [${className}]..."
-            }
-            // @todo fire event here
-
-            obj.save(flush:true)
+        // @todo fire event here
+        
+        if (obj) {
+            obj?.save(flush:true)
             user.userObjectClassName = className
             user.userObjectId = obj.ident().toString()
         }
@@ -247,7 +255,7 @@ class FreshSecurityService implements InitializingBean {
         emailConfirmationService.sendConfirmation(to:user.email, subject:"Confirm your new account", 
             plugin:'fresh-security', 
             view:'/email-templates/signup-confirmation',
-            id:user.userName,
+            id:user.identity,
             handler:CONFIRMATION_HANDLER_SIGNUP_CONFIRM)
     }
     

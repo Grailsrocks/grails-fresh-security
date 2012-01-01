@@ -54,7 +54,7 @@ class FreshSecurityAuthController {
 		String postUrl = "${request.contextPath}${config.apf.filterProcessesUrl}"
 		render( view: view, model: [
 		    postUrl: postUrl,
-		    loginForm: new LoginFormCommand(userName:userName),
+		    loginForm: new LoginFormCommand(identity:userName),
             rememberMeParameter: config.rememberMe.parameter])
 	}
 
@@ -233,7 +233,7 @@ class FreshSecurityAuthController {
         }
 
         if (log.debugEnabled) {
-            log.debug "User signing up: ${form.userName}"
+            log.debug "User signing up: ${form.identity}"
         }
         
         if (form.hasErrors()) {
@@ -250,12 +250,12 @@ class FreshSecurityAuthController {
 		
 		if (user.hasErrors()) {
             if (log.debugEnabled) {
-                log.debug "User signing up, failed to save user: ${user.userName} - errors: ${user.errors}"
+                log.debug "User signing up, failed to save user: ${user.identity} - errors: ${user.errors}"
             }
             render(view:'signup', model:[form:form])
 		} else {
             if (log.debugEnabled) {
-                log.debug "User signed up, redirecting to post signup url: ${user.userName}"
+                log.debug "User signed up, redirecting to post signup url: ${user.identity}"
             }
             displayFlashMessage text:FreshSecurityService.PLUGIN_SCOPE+(user.accountLocked ? 'signup.confirm.required' : 'signup.complete'), 
                 type:'info'

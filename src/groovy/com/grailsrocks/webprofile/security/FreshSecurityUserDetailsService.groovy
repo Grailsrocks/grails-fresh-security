@@ -40,14 +40,19 @@ class FreshSecurityUserDetailsService implements GrailsUserDetailsService, Initi
 
         domainClass.withTransaction { status ->
 
-            def user = domainClass.findByUserName(username)
+            def user = domainClass.findByIdentity(username)
             if (!user) throw new UsernameNotFoundException('User not found', username)
 
             def authorities = user.authorities.collect { a -> 
                 new GrantedAuthorityImpl(a) 
             }
 
-            return new FreshSecurityUserDetails(user, authorities)
+            def userObjectClassName = user.userObjectClassName
+            def userObjectClass
+            if (userObjectClassName) {
+                userObjectClass = grailsApplication.classLoader.loadClass(userObjectClassName)
+            }
+            return new FreshSecurityUserDetails(user, authorities, userObjectClass)
         }
     }
 }

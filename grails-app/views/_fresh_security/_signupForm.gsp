@@ -7,7 +7,7 @@
 <ui:form method="post" id="signupForm" url="[action:'doSignup', controller:'auth']">
 <fieldset>
     <fresh:ifIdentityMode value="userid">
-        <ui:field bean="${form}" name="userName" tabindex="1"/>
+        <ui:field bean="${form}" name="identity" tabindex="1"/>
     </fresh:ifIdentityMode>
     <ui:field bean="${form}" name="email" tabindex="2"/>
     <ui:field bean="${form}" name="password" type="password" tabindex="3"/>

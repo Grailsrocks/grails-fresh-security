@@ -16,6 +16,7 @@ class FreshSecurityGrailsPlugin {
     ]
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
+        "grails-app/domain/test/**/*.*",
         "grails-app/views/error.gsp",
         "grails-app/views/index.gsp"
     ]
@@ -103,8 +104,9 @@ Security that "just works", backed by Spring Security
         'account.locked.until.email.confirm'(defaultValue:'false')
         'post.login.url'(defaultValue:[uri:'/'])
         'post.signup.url'(defaultValue:[uri:'/'])
-        'post.login.always_default'(defaultValue:true)
+//        'post.login.always_default'(defaultValue:true)
         'bad.confirmation.url'(defaultValue:[uri:'/bad-confirmation'])
+        'user.object.class.name'(defaultValue:'')
     }
     
     def doWithConfig = { config ->
@@ -126,11 +128,11 @@ Security that "just works", backed by Spring Security
         
             grails.plugins.springsecurity.securityConfigType = SecurityConfigType.InterceptUrlMap
             grails.plugins.springsecurity.userLookup.userDomainClassName = 'com.grailsrocks.webprofile.security.SecUser'
-            grails.plugins.springsecurity.userLookup.usernamePropertyName = 'userName'
+            grails.plugins.springsecurity.userLookup.usernamePropertyName = 'identity'
             grails.plugins.springsecurity.failureHandler.defaultFailureUrl = '/auth/loginFail'
             grails.plugins.springsecurity.adh.errorPage = '/auth/denied'
             grails.plugins.springsecurity.auth.loginFormUrl = '/auth'
-            grails.plugins.springsecurity.apf.usernameParameter = "userName"
+            grails.plugins.springsecurity.apf.usernameParameter = "identity"
             grails.plugins.springsecurity.apf.passwordParameter = "password"
             grails.plugins.springsecurity.rememberMe.parameter = "rememberMe"
 
@@ -160,9 +162,6 @@ Security that "just works", backed by Spring Security
     }
 
     def onChange = { event ->
-        // TODO Implement code that is executed when any artefact that this plugin is
-        // watching is modified and reloaded. The event contains: event.source,
-        // event.application, event.manager, event.ctx, and event.plugin.
     }
 
     def onConfigChange = { event ->
