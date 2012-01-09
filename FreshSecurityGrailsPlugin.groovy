@@ -107,6 +107,7 @@ Security that "just works", backed by Spring Security
 //        'post.login.always_default'(defaultValue:true)
         'bad.confirmation.url'(defaultValue:[uri:'/bad-confirmation'])
         'user.object.class.name'(defaultValue:'')
+        'allow.confirm.bypass'(defaultValue:false, type:Boolean)
     }
     
     def doWithConfig = { config ->

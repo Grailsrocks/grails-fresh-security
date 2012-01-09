@@ -174,7 +174,7 @@ class FreshSecurityService implements InitializingBean {
             log.debug "Creating new user ${identity}..."
         }
         
-        boolean confirmBypass = (Environment.current == Environment.DEVELOPMENT) && userInfo.confirmBypass
+        boolean confirmBypass = pluginConfig.allow.confirm.bypass && userInfo.confirmBypass
         boolean confirmEmail = pluginConfig.confirm.email.on.signup && !confirmBypass
         boolean lockedUntilConfirmEmail = pluginConfig.account.locked.until.email.confirm && !confirmBypass
          
