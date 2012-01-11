@@ -19,7 +19,6 @@ class FreshSecurityProvider implements SecurityBridge {
      * Get user info object i.e. email address, other stuff defined by the application
      */
     def getUserInfo() {
-        println "principal: "+springSecurityService.principal 
         springSecurityService.principal instanceof String ? null : springSecurityService.principal
     }
 
