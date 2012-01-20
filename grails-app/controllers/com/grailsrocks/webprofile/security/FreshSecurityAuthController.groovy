@@ -24,7 +24,7 @@ class FreshSecurityAuthController {
     def grailsApplication
 
 	def index = {
-		if (securityUser) {
+		if (securityIdentity) {
 		    goToPostLoginPage()
 		}
 		else {
@@ -43,7 +43,7 @@ class FreshSecurityAuthController {
 
 		def config = SpringSecurityUtils.securityConfig
 
-		if (securityUser) {
+		if (securityIdentity) {
 		    goToPostLoginPage()
 			return
 		}
