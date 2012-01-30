@@ -1,10 +1,15 @@
 package com.grailsrocks.webprofile.security
 
+import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils        
 import org.grails.plugin.platform.security.SecurityBridge
 
 class FreshSecurityProvider implements SecurityBridge {
     def springSecurityService
     def grailsApplication
+    
+    String getProviderName() {
+        "Fresh Security"
+    }
     
     String getUserIdentity() {
         def princ = springSecurityService.principal
@@ -23,7 +28,8 @@ class FreshSecurityProvider implements SecurityBridge {
     }
 
     boolean userHasRole(role) {
-        def princ = springSecurityService.principal
+        springSecurityService.ifAnyGranted(role.toString())
+/*        def princ = springSecurityService.principal
         if (princ instanceof String) {
             return grailsApplication.config.plugin.freshSecurity.guest.roles
         }
@@ -33,6 +39,7 @@ class FreshSecurityProvider implements SecurityBridge {
             auths.addAll(authorities)
         }
         return auths ?: ['ROLE_GUEST']
+*/
     }
 
     /**
@@ -54,5 +61,9 @@ class FreshSecurityProvider implements SecurityBridge {
                 throw new IllegalArgumentException('Security link [$action] is not recognized')
         }
         return r
+    }
+    
+    def withUser(identity, Closure closure) {
+        SpringSecurityUtils.doWithAuth(identity, closure)
     }
 }
