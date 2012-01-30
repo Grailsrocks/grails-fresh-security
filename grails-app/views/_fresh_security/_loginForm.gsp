@@ -1,6 +1,6 @@
 <g:requiresBean name="loginForm" class="com.grailsrocks.webprofile.security.forms.LoginFormCommand"/>
 
-<ui:form method="post" id="loginForm" url="${createLinkTo(dir: '/j_spring_security_check')}">
+<ui:form method="post" id="loginForm" url="${createLinkTo(uri: '/j_spring_security_check')}">
 <fieldset>
      <ui:field bean="${loginForm}" name="identity" tabindex="1"/>
      <ui:field bean="${loginForm}" name="password" type="password" tabindex="2"/>
