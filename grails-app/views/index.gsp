@@ -9,7 +9,7 @@
         
             <ui:displayMessage/>
         
-            <p>You are logged in as: <s:userIdentity/>, user object: ${fresh.userObject()?.dump().encodeAsHTML()}</p>
+            <p>You are logged in as: <s:identity/>, user object: ${fresh.userObject()?.dump().encodeAsHTML()}</p>
 
     	    <fresh:loginForm/>
 
