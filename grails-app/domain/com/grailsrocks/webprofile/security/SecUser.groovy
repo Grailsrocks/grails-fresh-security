@@ -48,7 +48,12 @@ class SecUser {
 	}
 	
 	void setUserObject(obj) {
-	    userObjectClassName = obj?.class.name
-	    userObjectId = obj?.ident()
+	    if (obj) {
+	        userObjectClassName = obj.getClass().name
+	        userObjectId = obj.ident()
+        } else {
+	        userObjectClassName = null
+	        userObjectId = null
+        }
 	}
 }

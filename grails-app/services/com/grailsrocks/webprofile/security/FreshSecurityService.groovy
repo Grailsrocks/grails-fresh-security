@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.*
 import org.codehaus.groovy.grails.plugins.springsecurity.NullSaltSource
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.security.core.context.SecurityContextHolder
 
 /*
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
@@ -14,7 +15,6 @@ import org.springframework.security.authentication.AccountExpiredException
 import org.springframework.security.authentication.CredentialsExpiredException
 import org.springframework.security.authentication.DisabledException
 import org.springframework.security.authentication.LockedException
-import org.springframework.security.core.context.SecurityContextHolder as SCH
 import org.springframework.security.web.WebAttributes
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 */
@@ -158,8 +158,16 @@ class FreshSecurityService implements InitializingBean {
             handler:CONFIRMATION_HANDLER_PASSWORDRESET)
     }
     
+    void logout() {
+        SecurityContextHolder.context.authentication = null
+    }
+    
     void setCurrentUser(identity) {
-        springSecurityService.reauthenticate identity
+        if (identity != null) {
+            springSecurityService.reauthenticate identity
+        } else {
+            logout()
+        }
     }
     
     def encodePassword(userInfo, String password) {
@@ -245,9 +253,12 @@ class FreshSecurityService implements InitializingBean {
         // @todo fire event here
         
         if (obj) {
-            obj?.save(flush:true)
-            user.userObjectClassName = className
-            user.userObjectId = obj.ident().toString()
+            if (obj?.save(flush:true)) {
+                user.userObjectClassName = className
+                user.userObjectId = obj.ident().toString()
+            } else {
+                log.warn "Could not save Application's user object [${obj}] - errors: [${obj.errors}]"
+            }
         }
     }
 

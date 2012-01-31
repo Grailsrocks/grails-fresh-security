@@ -37,9 +37,7 @@ class FreshSecurityUserDetailsService implements GrailsUserDetailsService, Initi
     }
 
     UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-
         domainClass.withTransaction { status ->
-
             def user = domainClass.findByIdentity(username)
             if (!user) throw new UsernameNotFoundException('User not found', username)
 

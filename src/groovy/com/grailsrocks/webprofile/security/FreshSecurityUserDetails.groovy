@@ -2,8 +2,11 @@ package com.grailsrocks.webprofile.security
 
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
+import org.apache.commons.logging.LogFactory
 
 class FreshSecurityUserDetails implements UserDetails {
+    def log = LogFactory.getLog(FreshSecurityUserDetails )
+
     final Collection<GrantedAuthority> authorities
     final String password
     final String identity
@@ -32,6 +35,9 @@ class FreshSecurityUserDetails implements UserDetails {
     }
     
     def getUserObject() {
+        if (log.debugEnabled) {
+            log.debug "Getting userObject for user [${identity}], class of userObject is [${userObjectClass}], id is ${userObjectId} (${userObjectId?.getClass()})"
+        }
         userObjectId ? userObjectClass?.get(userObjectId) : null
     }
     

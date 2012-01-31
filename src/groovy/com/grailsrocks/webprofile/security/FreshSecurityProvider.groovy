@@ -2,8 +2,11 @@ package com.grailsrocks.webprofile.security
 
 import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils        
 import org.grails.plugin.platform.security.SecurityBridge
+import org.apache.commons.logging.LogFactory
 
 class FreshSecurityProvider implements SecurityBridge {
+    def log = LogFactory.getLog(FreshSecurityProvider)
+
     def springSecurityService
     def grailsApplication
     
@@ -13,9 +16,15 @@ class FreshSecurityProvider implements SecurityBridge {
     
     String getUserIdentity() {
         def princ = springSecurityService.principal
+        if (log.debugEnabled) {
+            log.debug "Getting current user identity, principal is [$princ] (${princ?.getClass()})"
+        }
         if (princ instanceof String) {
             return null
         } else {
+            if (log.debugEnabled) {
+                log.debug "Getting current user identity, returning principal identity [${princ?.identity}] (${princ?.identity.getClass()})"
+            }
             return princ?.identity   
         }
     }
@@ -24,7 +33,15 @@ class FreshSecurityProvider implements SecurityBridge {
      * Get user info object i.e. email address, other stuff defined by the application
      */
     def getUserInfo() {
-        springSecurityService.principal instanceof String ? null : springSecurityService.principal
+        def princ = springSecurityService.principal 
+        if (log.debugEnabled) {
+            log.debug "Getting current user info, principal is [${princ}] (${princ?.getClass()})"
+        }
+        def value = princ instanceof String ? null : princ
+        if (log.debugEnabled) {
+            log.debug "Getting current user info, returning [${value}] (${value?.getClass()})"
+        }
+        return value
     }
 
     boolean userHasRole(role) {
