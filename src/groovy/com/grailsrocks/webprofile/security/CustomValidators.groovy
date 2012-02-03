@@ -29,8 +29,8 @@ class CustomValidators {
 	}
 
     static final passwordStrengthAndUserName = { password, instance ->
-		if (instance.userName && instance.userName.equals(password)) {
-			return 'password.cannot.be.username'
+		if (instance.identity && instance.identity.equals(password)) {
+			return 'password.cannot.be.same.as.identity'
 		}
 
         // @todo externalize the strength calculation via event or similar

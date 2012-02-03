@@ -252,6 +252,10 @@ class FreshSecurityAuthController {
             if (log.debugEnabled) {
                 log.debug "User signing up, failed to save user: ${user.identity} - errors: ${user.errors}"
             }
+            // have to add the security object errors to the form
+            for (e in user.errors.allErrors) {
+                form.errors.rejectValue(e.field, e.code, e.arguments, e.defaultMessage)
+            }
             render(view:'signup', model:[form:form])
 		} else {
             if (log.debugEnabled) {
