@@ -21,7 +21,7 @@ class FreshSecurityGrailsPlugin {
         "grails-app/views/index.gsp"
     ]
 
-    def loadAfter = ['springSecurityCore', 'emailConfirmation'] // We must apply our beans AFTER spring-sec declares its own
+    def loadAfter = ['springSecurityCore', 'emailConfirmation', 'pluginPlatform'] // We must apply our beans AFTER spring-sec declares its own
     
     def title = "Fresh Security Plugin" // Headline display name of the plugin
     def author = "Marc Palmer"
@@ -54,6 +54,8 @@ Security that "just works", backed by Spring Security
     }
 
     def doWithSpring = {        
+        println "In fresh sec doWithSpring"
+        
         userDetailsService(com.grailsrocks.webprofile.security.FreshSecurityUserDetailsService) {
             grailsApplication = ref('grailsApplication')
         }
@@ -61,6 +63,8 @@ Security that "just works", backed by Spring Security
             springSecurityService = ref('springSecurityService')
             grailsApplication = ref('grailsApplication')
         }
+        println "Out of fresh sec doWithSpring"
+        
     }
 
     def doWithDynamicMethods = { ctx ->
@@ -129,10 +133,15 @@ Security that "just works", backed by Spring Security
         
             grails.plugins.springsecurity.securityConfigType = SecurityConfigType.InterceptUrlMap
             grails.plugins.springsecurity.userLookup.userDomainClassName = 'com.grailsrocks.webprofile.security.SecUser'
-            grails.plugins.springsecurity.userLookup.usernamePropertyName = 'identity'
+            grails.plugins.springsecurity.userLookup.usernamePropertyName = 'identity'  
+
+            // @todo these have been hardcoded to "auth", need to pull that from config
             grails.plugins.springsecurity.failureHandler.defaultFailureUrl = '/auth/loginFail'
-            grails.plugins.springsecurity.adh.errorPage = '/auth/denied'
+            //grails.plugins.springsecurity.adh.errorPage = null
+            //grails.plugins.springsecurity.failureHandler.useForward = true // force render of 403 response, not redirect to errorPage
+            //grails.plugins.springsecurity.adh.errorPage = '/auth/denied'
             grails.plugins.springsecurity.auth.loginFormUrl = '/auth'
+
             grails.plugins.springsecurity.apf.usernameParameter = "identity"
             grails.plugins.springsecurity.apf.passwordParameter = "password"
             grails.plugins.springsecurity.rememberMe.parameter = "rememberMe"

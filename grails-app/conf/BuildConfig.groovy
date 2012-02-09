@@ -35,7 +35,7 @@ grails.project.dependency.resolution = {
             export = false
         }
 
-        build(':plugin-platform:1.0-SNAPSHOT') {
+        compile(':plugin-platform:1.0-SNAPSHOT') {
             excludes "spring-test"
         }
             
