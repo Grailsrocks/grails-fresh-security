@@ -31,3 +31,8 @@ grails.views.gsp.encoding="UTF-8"
 
 grails.theme.default.theme = 'Bootstrap'
 
+environments {
+    development {
+        plugin.freshSecurity.allow.confirm.bypass = true
+    }
+}

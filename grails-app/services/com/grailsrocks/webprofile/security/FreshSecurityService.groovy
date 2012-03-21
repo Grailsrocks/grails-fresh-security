@@ -23,8 +23,6 @@ class FreshSecurityService implements InitializingBean {
     static transactional = false
     
     static final String PLUGIN_SCOPE = 'plugin.freshSecurity.'
-    static final String CONFIRMATION_HANDLER_PASSWORDRESET = PLUGIN_SCOPE+'password.reset'
-    static final String CONFIRMATION_HANDLER_SIGNUP_CONFIRM = PLUGIN_SCOPE+'signup.confirm'
     
     static final String SESSION_VAR_PASSWORD_RESET_MODE = PLUGIN_SCOPE+'password.reset.mode'
     static final String SESSION_VAR_PASSWORD_RESET_IDENTITY = PLUGIN_SCOPE+'password.reset.identity'
@@ -54,28 +52,23 @@ class FreshSecurityService implements InitializingBean {
     }
 
     void afterPropertiesSet() {
-        init()
     }
     
-    void init() {
-        emailConfirmationService.addConfirmedHandler(this.&handlePasswordResetConfirmation, CONFIRMATION_HANDLER_PASSWORDRESET)
-        emailConfirmationService.addConfirmedHandler(this.&handleSignupConfirmation, CONFIRMATION_HANDLER_SIGNUP_CONFIRM)
-    }
-
     /**
      * Check user exists, then set session var to indicate that user is in "reset mode" and
      * redirect to password set screen
      */
     @Transactional
-    def handlePasswordResetConfirmation(args) {
+    @org.grails.plugin.platform.events.Listener('plugin.freshSecurity.password.reset.confirmed')
+    def passwordResetConfirmed(args) {
         if (findUserByIdentity(args.id)) { 
             def session = RequestContextHolder.requestAttributes.session
     	    
             session[SESSION_VAR_PASSWORD_RESET_MODE] = true
             session[SESSION_VAR_PASSWORD_RESET_IDENTITY] = args.id
-            return [controller:'auth', action:'resetPassword']
+            return [controller:'freshSecurityAuth', action:'resetPassword']
         } else {
-            return [controller:'auth', action:'badRequest']
+            return [controller:'freshSecurityAuth', action:'badRequest']
         }
     }
 
@@ -83,7 +76,8 @@ class FreshSecurityService implements InitializingBean {
      * Mark their account as enabled, redirect them to login screen
      */
     @Transactional
-    def handleSignupConfirmation(args) {
+    @org.grails.plugin.platform.events.Listener('plugin.freshSecurity.new.user.confirmed')
+    def newUserConfirmed(args) {
         def user = findUserByIdentity(args.id)
         if (user) { 
             user.accountLocked = false
@@ -140,6 +134,8 @@ class FreshSecurityService implements InitializingBean {
             }
             user.password = encodePassword(user.identity, newPassword)
             user.save(flush:true) // Seems like a good plan, right?
+            
+            event('freshSecurity.password.reset', user)
         } else {
             if (log.infoEnabled) {
                 log.info "Could not reset password for user [${userId}], user not found"
@@ -155,7 +151,7 @@ class FreshSecurityService implements InitializingBean {
             plugin:'fresh-security', 
             view:'/email-templates/password-reset-confirmation',
             id:user.identity,
-            handler:CONFIRMATION_HANDLER_PASSWORDRESET)
+            event:PLUGIN_SCOPE+'password.reset')
     }
     
     void logout() {
@@ -250,7 +246,7 @@ class FreshSecurityService implements InitializingBean {
             log.debug "Populating new application user object for [${user.identity}] of type [${className}]..."
         }
 
-        // @todo fire event here
+        event('freshSecurity.new.user', new NewUserEvent(user:user, userObject:obj))
         
         if (obj) {
             if (obj?.save(flush:true)) {
@@ -267,7 +263,7 @@ class FreshSecurityService implements InitializingBean {
             plugin:'fresh-security', 
             view:'/email-templates/signup-confirmation',
             id:user.identity,
-            handler:CONFIRMATION_HANDLER_SIGNUP_CONFIRM)
+            event:PLUGIN_SCOPE+'new.user')
     }
     
     Class getUserClass() {

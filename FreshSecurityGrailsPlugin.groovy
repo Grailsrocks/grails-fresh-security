@@ -11,8 +11,8 @@ class FreshSecurityGrailsPlugin {
     def grailsVersion = "1.3.7 > *"
     // the other plugins this plugin depends on
     def dependsOn = [
-        'pluginPlatform':'1.0 > *',
-        'springSecurityCore':'1.2.6 > *'
+        platformCore:'1.0 > *',
+        springSecurityCore:'1.2.6 > *'
     ]
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
@@ -21,7 +21,7 @@ class FreshSecurityGrailsPlugin {
         "grails-app/views/index.gsp"
     ]
 
-    def loadAfter = ['springSecurityCore', 'emailConfirmation', 'pluginPlatform'] // We must apply our beans AFTER spring-sec declares its own
+    def loadAfter = ['springSecurityCore', 'emailConfirmation', 'platformCore'] // We must apply our beans AFTER spring-sec declares its own
     
     def title = "Fresh Security Plugin" // Headline display name of the plugin
     def author = "Marc Palmer"

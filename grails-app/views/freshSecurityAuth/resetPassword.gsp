@@ -4,7 +4,7 @@
         <theme:layout name="form"/>
 	</head>
 	<body>
-        <ui:title text="plugin.freshSecurity.reset.password.form.title"/>
+        <theme:title text="plugin.freshSecurity.reset.password.form.title"/>
 	    <theme:zone name="body">
             <ui:displayMessage/>
 	        <fresh:resetPasswordForm/>

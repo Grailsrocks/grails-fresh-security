@@ -180,7 +180,7 @@ class FreshSecurityAuthController {
                 freshSecurityService.resetPassword(userIdentity, form.newPassword)
                 session[FreshSecurityService.SESSION_VAR_PASSWORD_RESET_MODE] = false
                 displayFlashMessage text:FreshSecurityService.PLUGIN_SCOPE+'password.reset.complete'
-                goToPostLoginPage()
+                goToPostLoginPage() 
             } else {
                 if (log.infoEnabled) {
                     log.info "Request to reset password for user [${userIdentity}] had errors"
@@ -261,6 +261,7 @@ class FreshSecurityAuthController {
             if (log.debugEnabled) {
                 log.debug "User signed up, redirecting to post signup url: ${user.identity}"
             }
+            // @todo adjust this message if in dev and they did confirm bypass, make it clearer
             displayFlashMessage text:FreshSecurityService.PLUGIN_SCOPE+(user.accountLocked ? 'signup.confirm.required' : 'signup.complete'), 
                 type:'info'
             goToPostLoginPage()

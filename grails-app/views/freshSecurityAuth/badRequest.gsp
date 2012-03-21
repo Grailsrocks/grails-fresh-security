@@ -4,7 +4,7 @@
         <theme:layout name="form"/>
 	</head>
 	<body>
-        <ui:title text="plugin.freshSecurity.bad.request.title"/>
+        <theme:title text="plugin.freshSecurity.bad.request.title"/>
 	    <theme:zone name="body">
             <ui:displayMessage/>
 	        <p>Sorry, something went wrong</p>
