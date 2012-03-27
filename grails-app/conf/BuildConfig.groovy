@@ -9,7 +9,7 @@ grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
     inherits("global") {
         // uncomment to disable ehcache
-        excludes 'spring-test'
+        excludes 'spring-test', 'xml-apis', 'xerces'
     }
     log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     repositories {
@@ -31,11 +31,11 @@ grails.project.dependency.resolution = {
 
     plugins {
         build(":tomcat:$grailsVersion",
-              ":release:1.0.1") {
+              ":release:1.0.2-SNAPSHOT") {
             export = false
         }
 
-        compile(':platform-core:1.0.M1-SNAPSHOT') {
+        compile(':platform-core:1.0.M1') {
             excludes "spring-test"
         }
 
