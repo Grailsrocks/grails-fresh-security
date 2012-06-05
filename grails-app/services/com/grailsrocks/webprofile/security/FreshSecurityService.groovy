@@ -35,6 +35,7 @@ class FreshSecurityService implements InitializingBean {
     def springSecurityService
     def emailConfirmationService
     def grailsUiHelper
+    def userDetailsService
     
     @Transactional
     boolean userExists(identity) {
@@ -59,7 +60,7 @@ class FreshSecurityService implements InitializingBean {
      * redirect to password set screen
      */
     @Transactional
-    @org.grails.plugin.platform.events.Listener('plugin.freshSecurity.password.reset.confirmed')
+    @grails.events.Listener('plugin.freshSecurity.password.reset.confirmed')
     def passwordResetConfirmed(args) {
         if (findUserByIdentity(args.id)) { 
             def session = RequestContextHolder.requestAttributes.session
@@ -76,7 +77,7 @@ class FreshSecurityService implements InitializingBean {
      * Mark their account as enabled, redirect them to login screen
      */
     @Transactional
-    @org.grails.plugin.platform.events.Listener('plugin.freshSecurity.new.user.confirmed')
+    @grails.events.Listener('plugin.freshSecurity.new.user.confirmed')
     def newUserConfirmed(args) {
         def user = findUserByIdentity(args.id)
         if (user) { 
@@ -257,8 +258,47 @@ class FreshSecurityService implements InitializingBean {
             }
         }
     }
+    
+    @Transactional
+    boolean deleteUser(identity) {
+        if (log.infoEnabled) {
+            log.info "Removing user account: [${identity}]"
+        }
+        
+        def user = userDetailsService.loadUserByUsername(identity) 
+        if (user) {
+            // Delete the app's object
+            def userObj = user.userObject
+            if (userObj) {
+                userObj.delete(flush:true)
+            }
+            
+            // Delete our security user object
+            def dbUser = findUserByIdentity(identity)
+            if (dbUser) {
+                dbUser.delete(flush:true)
+            }
+        
+            return true
+        } else {
+            if (log.infoEnabled) {
+                log.info "Could not remove user account [${identity}], no such account"
+            }
+            return false
+        }
+    }
+
+    void sendNewAccountConfirmationEmail(user) {
+        if (log.infoEnabled) {
+            log.info "Sending another account signup confirmation email to [${user.email}]"
+        }
+        sendSignupConfirmation(user)
+    }
 
     void sendSignupConfirmation(user) {
+        if (log.infoEnabled) {
+            log.info "Sending account signup confirmation email to [${user.email}]"
+        }
         emailConfirmationService.sendConfirmation(to:user.email, subject:"Confirm your new account", 
             plugin:'fresh-security', 
             view:'/email-templates/signup-confirmation',

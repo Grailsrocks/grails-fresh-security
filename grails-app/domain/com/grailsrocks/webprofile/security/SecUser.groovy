@@ -4,6 +4,8 @@ package com.grailsrocks.webprofile.security
  * The domain class encapsulating the user
  */
 class SecUser {
+    static transients = ['userObject']
+    
     String identity
 
     String email

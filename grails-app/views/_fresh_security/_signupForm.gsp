@@ -1,4 +1,4 @@
-<g:requiresBean name="form" class="com.grailsrocks.webprofile.security.forms.SignupFormCommand"/>
+<p:requiresBean name="form" class="com.grailsrocks.webprofile.security.forms.SignupFormCommand"/>
 
 <g:if test="${form.hasErrors()}">
     <ui:message type="error"><p><g:message code="plugin.freshSecurity.signup.screen.has.errors"/></p></ui:message>

@@ -1,4 +1,4 @@
-<g:requiresBean name="forgotForm" class="com.grailsrocks.webprofile.security.forms.ForgotPasswordFormCommand"/>
+<p:requiresBean name="forgotForm" class="com.grailsrocks.webprofile.security.forms.ForgotPasswordFormCommand"/>
 
 <p><g:message code="plugin.freshSecurity.forgot.password.form.text" encodeAs="HTML"/></p>
 

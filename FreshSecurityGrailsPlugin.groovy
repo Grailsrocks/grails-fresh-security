@@ -54,8 +54,6 @@ Security that "just works", backed by Spring Security
     }
 
     def doWithSpring = {        
-        println "In fresh sec doWithSpring"
-        
         userDetailsService(com.grailsrocks.webprofile.security.FreshSecurityUserDetailsService) {
             grailsApplication = ref('grailsApplication')
         }
@@ -63,8 +61,6 @@ Security that "just works", backed by Spring Security
             springSecurityService = ref('springSecurityService')
             grailsApplication = ref('grailsApplication')
         }
-        println "Out of fresh sec doWithSpring"
-        
     }
 
     def doWithDynamicMethods = { ctx ->

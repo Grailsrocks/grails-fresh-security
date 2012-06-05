@@ -36,13 +36,13 @@ class FreshSecurityTagLib {
     def logoutLink = { attrs ->
 		attrs.controller = "auth"
 		attrs.action = "logout"
-		out << g.smartLink(attrs)
+		out << p.smartLink(attrs)
     }
 
     def resetPasswordLink = { attrs->
 		attrs.controller = "auth"
 		attrs.action = "forgotPassword"
-		out << g.smartLink(attrs)
+		out << p.smartLink(attrs)
     }
 
     def ifSignupAllowed = { attrs, body ->

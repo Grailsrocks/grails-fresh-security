@@ -11,9 +11,10 @@ grails.project.dependency.resolution = {
         // uncomment to disable ehcache
         excludes 'spring-test', 'xml-apis', 'xerces'
     }
+    
     log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     repositories {
-        grailsCentral()
+        //grailsCentral()
         // uncomment the below to enable remote dependency resolution
         // from public Maven repositories
         //mavenCentral()
@@ -22,6 +23,7 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.codehaus.org"
         //mavenRepo "http://download.java.net/maven/2/"
         //mavenRepo "http://repository.jboss.com/maven2/"
+        mavenRepo "http://repo.grails.org/grails/plugins"
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
@@ -31,21 +33,22 @@ grails.project.dependency.resolution = {
 
     plugins {
         build(":tomcat:$grailsVersion",
-              ":release:1.0.2-SNAPSHOT") {
+              ":release:2.0.2") {
             export = false
         }
 
-        compile(':platform-core:1.0.M1') {
+        compile(':platform-core:1.0.M2e-SNAPSHOT') {
             excludes "spring-test"
         }
 
         compile(':spring-security-core:1.2.6') 
-        compile(':email-confirmation:2.0-SNAPSHOT') 
+//        compile(':email-confirmation:2.0-SNAPSHOT') 
         compile ":resources:1.1.6"
-            
+/*            
         runtime(':bootstrap-theme:1.0.BUILD-SNAPSHOT') {
             export = false
             excludes "spring-test"
         }
+*/
     }
 }

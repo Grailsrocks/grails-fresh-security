@@ -1,5 +1,5 @@
 --
-<g:siteName/> Team
-<g:siteURL/>
+<p:siteName/> Team
+<p:siteURL/>
 
-<g:organization/>
+<p:organization/>

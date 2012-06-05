@@ -1,4 +1,4 @@
-<g:requiresBean name="form" class="com.grailsrocks.webprofile.security.forms.PasswordResetFormCommand"/>
+<p:requiresBean name="form" class="com.grailsrocks.webprofile.security.forms.PasswordResetFormCommand"/>
 
 <g:if test="${form.hasErrors()}">
     <ui:message type="error"><p><g:message code="plugin.freshSecurity.reset.password.screen.has.errors"/></p></ui:message>

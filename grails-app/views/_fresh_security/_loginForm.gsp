@@ -1,4 +1,4 @@
-<g:requiresBean name="loginForm" class="com.grailsrocks.webprofile.security.forms.LoginFormCommand"/>
+<p:requiresBean name="loginForm" class="com.grailsrocks.webprofile.security.forms.LoginFormCommand"/>
 
 <ui:form method="post" id="loginForm" url="${createLink(uri: '/j_spring_security_check')}">
 <fieldset>
@@ -9,7 +9,7 @@
      <ui:actions>
         <ui:button type="submit" tabindex="4" text="action.auth.login"/>
         <fresh:ifSignupAllowed>
-        or <g:smartLink controller="auth" action="signup"/>
+        or <p:smartLink controller="auth" action="signup"/>
         </fresh:ifSignupAllowed>
      </ui:actions>
 </fieldset>
