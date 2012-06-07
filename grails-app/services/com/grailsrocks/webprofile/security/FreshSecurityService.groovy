@@ -22,7 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 class FreshSecurityService implements InitializingBean {
     static transactional = false
     
-    static final String PLUGIN_SCOPE = 'plugin.freshSecurity.'
+    static final String PLUGIN_SCOPE = 'plugin.freshSecurity'
     
     static final String SESSION_VAR_PASSWORD_RESET_MODE = PLUGIN_SCOPE+'password.reset.mode'
     static final String SESSION_VAR_PASSWORD_RESET_IDENTITY = PLUGIN_SCOPE+'password.reset.identity'
@@ -59,8 +59,17 @@ class FreshSecurityService implements InitializingBean {
      * Check user exists, then set session var to indicate that user is in "reset mode" and
      * redirect to password set screen
      */
+    @grails.events.Listener('confirmed') // scope:'emailConfirmation'
+    def emailAddressConfirmed(event) {
+        switch (event.confirmationEvent) {
+            case 'new.user':
+                return newUserConfirmed(event)
+            case 'password.reset': 
+                return passwordResetConfirmed(event)
+        }
+    }
+    
     @Transactional
-    @grails.events.Listener('plugin.freshSecurity.password.reset.confirmed')
     def passwordResetConfirmed(args) {
         if (findUserByIdentity(args.id)) { 
             def session = RequestContextHolder.requestAttributes.session
@@ -77,13 +86,12 @@ class FreshSecurityService implements InitializingBean {
      * Mark their account as enabled, redirect them to login screen
      */
     @Transactional
-    @grails.events.Listener('plugin.freshSecurity.new.user.confirmed')
     def newUserConfirmed(args) {
         def user = findUserByIdentity(args.id)
         if (user) { 
             user.accountLocked = false
             
-            onNewUserSignedUp(user)
+            onNewUserSignedUp(user, null)
 
             grailsUiHelper.displayFlashMessage text:PLUGIN_SCOPE+'signup.confirm.completed'
             
@@ -136,7 +144,7 @@ class FreshSecurityService implements InitializingBean {
             user.password = encodePassword(user.identity, newPassword)
             user.save(flush:true) // Seems like a good plan, right?
             
-            event('freshSecurity.password.reset', user)
+            event('passwordReset', user)
         } else {
             if (log.infoEnabled) {
                 log.info "Could not reset password for user [${userId}], user not found"
@@ -152,7 +160,8 @@ class FreshSecurityService implements InitializingBean {
             plugin:'fresh-security', 
             view:'/email-templates/password-reset-confirmation',
             id:user.identity,
-            event:PLUGIN_SCOPE+'password.reset')
+            event:'password.reset',
+            eventScope:PLUGIN_SCOPE)
     }
     
     void logout() {
@@ -174,6 +183,11 @@ class FreshSecurityService implements InitializingBean {
 
     @Transactional
     def createNewUser(userInfo, request = null) {
+        return createNewUserWithObject(userInfo, null, request)
+    }
+    
+    @Transactional
+    def createNewUserWithObject(userInfo, userObject, request = null) {
         def identity = pluginConfig.identity.mode == 'email' ? userInfo.email : userInfo.identity
         if (log.debugEnabled) {
             log.debug "Creating new user ${identity}..."
@@ -217,7 +231,7 @@ class FreshSecurityService implements InitializingBean {
                 if (log.debugEnabled) {
                     log.debug "User signing up, logging them in automatically: ${user.identity}"
                 }
-                onNewUserSignedUp(user)
+                onNewUserSignedUp(user, userObject)
                 
     		    setCurrentUser(user.identity)
 		    }
@@ -227,34 +241,39 @@ class FreshSecurityService implements InitializingBean {
     }
 
     @Transactional
-    void onNewUserSignedUp(user) {
+    void onNewUserSignedUp(user, userObject) {
         if (log.infoEnabled) {
             log.info "New user signed up: [${user.identity}]"
         }
         
-        def className = pluginConfig.user.object.class.name
-        def obj
-        if (className) {
-            if (log.infoEnabled) {
-                log.info "Creating new application user object for [${user.identity}] of type [${className}]"
+        boolean createdUserObject
+        if (!userObject && !user.userObjectId) {
+            def className = pluginConfig.user.object.class.name
+            if (className) {
+                if (log.infoEnabled) {
+                    log.info "Creating new application user object for [${user.identity}] of type [${className}]"
+                }
+                def cls = grailsApplication.classLoader.loadClass(className)
+                userObject = cls.newInstance()
+                createdUserObject = true
             }
-            def cls = grailsApplication.classLoader.loadClass(className)
-            obj = cls.newInstance()
-        }
         
     
-        if (log.infoEnabled) {
-            log.debug "Populating new application user object for [${user.identity}] of type [${className}]..."
+            if (log.infoEnabled) {
+                log.debug "Populating new application user object for [${user.identity}] of type [${className}]..."
+            }
         }
-
-        event('freshSecurity.new.user', new NewUserEvent(user:user, userObject:obj))
         
-        if (obj) {
-            if (obj?.save(flush:true)) {
-                user.userObjectClassName = className
-                user.userObjectId = obj.ident().toString()
+        // Let app unit user object or other side effects, or define user object
+        def eventObj = new NewUserEvent(user:user, userObject:userObject)
+        event('newUserCreated', eventObj)
+        
+        if (eventObj.userObject) {
+            if (eventObj.userObject.save(flush:true)) {
+                user.userObjectClassName = eventObj.userObject.getClass().name
+                user.userObjectId = eventObj.userObject.ident().toString()
             } else {
-                log.warn "Could not save Application's user object [${obj}] - errors: [${obj.errors}]"
+                log.warn "Could not save Application's user object [${eventObj.userObject}] - errors: [${eventObj.userObject.errors}]"
             }
         }
     }
@@ -303,7 +322,8 @@ class FreshSecurityService implements InitializingBean {
             plugin:'fresh-security', 
             view:'/email-templates/signup-confirmation',
             id:user.identity,
-            event:PLUGIN_SCOPE+'new.user')
+            event:'new.user',
+            eventScope:PLUGIN_SCOPE)
     }
     
     Class getUserClass() {
