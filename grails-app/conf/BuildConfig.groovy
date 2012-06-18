@@ -42,7 +42,7 @@ grails.project.dependency.resolution = {
         }
 
         compile(':spring-security-core:1.2.6') 
-        compile(':email-confirmation:2.0.1-SNAPSHOT') 
+        compile(':email-confirmation:2.0.3-SNAPSHOT') 
         compile ":resources:1.1.6"
 
         runtime(':bootstrap-theme:1.0.BUILD-SNAPSHOT') {

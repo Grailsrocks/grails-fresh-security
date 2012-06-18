@@ -157,7 +157,6 @@ class FreshSecurityService implements InitializingBean {
         emailConfirmationService.sendConfirmation(
             to:user.email, 
             subject:"Set your new password", 
-            plugin:'fresh-security', 
             view:'/email-templates/password-reset-confirmation',
             id:user.identity,
             event:'password.reset',
@@ -319,7 +318,6 @@ class FreshSecurityService implements InitializingBean {
             log.info "Sending account signup confirmation email to [${user.email}]"
         }
         emailConfirmationService.sendConfirmation(to:user.email, subject:"Confirm your new account", 
-            plugin:'fresh-security', 
             view:'/email-templates/signup-confirmation',
             id:user.identity,
             event:'new.user',
