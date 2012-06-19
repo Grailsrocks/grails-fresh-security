@@ -7,17 +7,7 @@ import org.codehaus.groovy.grails.plugins.springsecurity.NullSaltSource
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.security.core.context.SecurityContextHolder
-
-/*
-import org.codehaus.groovy.grails.plugins.springsecurity.SpringSecurityUtils
-
-import org.springframework.security.authentication.AccountExpiredException
-import org.springframework.security.authentication.CredentialsExpiredException
-import org.springframework.security.authentication.DisabledException
-import org.springframework.security.authentication.LockedException
-import org.springframework.security.web.WebAttributes
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
-*/
+import java.util.regex.Pattern
 
 class FreshSecurityService implements InitializingBean {
     static transactional = false
@@ -192,7 +182,10 @@ class FreshSecurityService implements InitializingBean {
             log.debug "Creating new user ${identity}..."
         }
         
-        boolean confirmBypass = pluginConfig.allow.confirm.bypass && userInfo.confirmBypass
+        boolean allowsBypass = pluginConfig.allow.confirm.bypass instanceof Pattern ? 
+            userInfo.email ==~ pluginConfig.allow.confirm.bypass : pluginConfig.allow.confirm.bypass.toBoolean()
+            
+        boolean confirmBypass = allowsBypass && userInfo.confirmBypass
         boolean confirmEmail = pluginConfig.confirm.email.on.signup && !confirmBypass
         boolean lockedUntilConfirmEmail = pluginConfig.account.locked.until.email.confirm && !confirmBypass
          

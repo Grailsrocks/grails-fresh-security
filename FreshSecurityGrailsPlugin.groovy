@@ -1,8 +1,11 @@
 import grails.plugins.springsecurity.SecurityConfigType
 
-import com.grailsrocks.webprofile.security.*
+import java.util.regex.Pattern
 import groovy.util.ConfigObject
+
 import org.codehaus.groovy.grails.plugins.PluginManagerHolder
+
+import com.grailsrocks.webprofile.security.*
 
 class FreshSecurityGrailsPlugin {
     // the plugin version
@@ -103,7 +106,7 @@ Security that "just works", backed by Spring Security
 //        'post.login.always_default'(defaultValue:true)
         'bad.confirmation.url'(defaultValue:[uri:'/bad-confirmation'])
         'user.object.class.name'(defaultValue:'')
-        'allow.confirm.bypass'(defaultValue:false, type:Boolean)
+        'allow.confirm.bypass'(defaultValue:false, validator: { v -> (v instanceof Boolean) || (v instanceof Pattern) ? null : 'Must be boolean or Pattern'})
     }
     
     def doWithConfig = { config ->
