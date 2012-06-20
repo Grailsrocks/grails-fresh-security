@@ -84,8 +84,11 @@ class FreshSecurityService implements InitializingBean {
             onNewUserSignedUp(user, null)
 
             grailsUiHelper.displayFlashMessage text:PLUGIN_SCOPE+'signup.confirm.completed'
-            
-            return pluginConfig.post.login.url
+            def redirectArgs = event('newUserConfirmedPage', user).value
+            if (log.debugEnabled) {
+                log.debug "Redirecting new user, app event returned redirect args: ${redirectArgs}"
+            }
+            return redirectArgs ?: pluginConfig.post.login.url
         } else {
             return pluginConfig.bad.confirmation.url
         }
@@ -134,7 +137,7 @@ class FreshSecurityService implements InitializingBean {
             user.password = encodePassword(user.identity, newPassword)
             user.save(flush:true) // Seems like a good plan, right?
             
-            event('passwordReset', user)
+            event('passwordWasReset', user)
         } else {
             if (log.infoEnabled) {
                 log.info "Could not reset password for user [${userId}], user not found"

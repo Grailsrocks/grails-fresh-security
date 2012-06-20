@@ -12,10 +12,27 @@ events = {
     'newUserCreated'()
     
     /*
-     * Send when a user successfully resets their password.
+     * Sent when a user has successfully reset their password.
      *
      * @param data The FreshSecurity domain instance of the user
      * @return none
      */
-    'passwordReset'()
+    'passwordWasReset'()
+
+    /*
+     * Sent when a user has successfully reset their password in the UI and needs to be redirected
+     * to a new page in the UI.
+     *
+     * @param data The FreshSecurity domain instance of the user
+     * @return Map of redirect() arguments. If empty or null, sends them to default post login page
+     */
+    'passwordResetCompletionPage'()
+
+    /*
+     * Sent when a user has successfully confirmed their account, to get the page it should redirect to
+     *
+     * @param data The FreshSecurity domain instance of the user
+     * @return Map of redirect() arguments. If empty or null, sends them to default post login page
+     */
+    'newUserConfirmedPage'()
 }

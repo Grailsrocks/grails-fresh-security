@@ -180,7 +180,12 @@ class FreshSecurityAuthController {
                 freshSecurityService.resetPassword(userIdentity, form.newPassword)
                 session[FreshSecurityService.SESSION_VAR_PASSWORD_RESET_MODE] = false
                 displayFlashMessage text:FreshSecurityService.PLUGIN_SCOPE+'password.reset.complete'
-                goToPostLoginPage() 
+                def redirectArgs = event('passwordResetCompletionPage', userIdentity).value
+                if (redirectArgs) {
+                    redirect(redirectArgs)
+                } else {
+                    goToPostLoginPage() 
+                }
             } else {
                 if (log.infoEnabled) {
                     log.info "Request to reset password for user [${userIdentity}] had errors"
