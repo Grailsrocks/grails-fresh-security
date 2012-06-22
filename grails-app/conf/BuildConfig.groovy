@@ -41,7 +41,7 @@ grails.project.dependency.resolution = {
         compile(':platform-core:1.0.M2h-SNAPSHOT') {
             excludes "spring-test"
         }
-
+        compile(':platform-ui:1.0.M1-SNAPSHOT') 
         compile(':spring-security-core:1.2.6') 
         compile(':email-confirmation:2.0.3-SNAPSHOT') 
         compile ":resources:1.1.6"

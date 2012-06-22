@@ -1,7 +1,7 @@
 <html>
 	<head>
 		<title><g:message code="plugin.freshSecurity.login.screen.title"/></title>
-        <theme:layout name="form"/>
+        <theme:layout name="dialog"/>
 	</head>
 	<body>
         <theme:title text="plugin.freshSecurity.login.form.title"/>

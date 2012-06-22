@@ -9,19 +9,19 @@ class FreshSecurityTagLib {
     def grailsSecurity
     
     def loginForm = { attrs, body ->
-        out << g.render(plugin:'freshSecurity', template:'/_fresh_security/loginForm')
+        out << g.render(template:'/_fresh_security/loginForm')
     }
 
     def signupForm = { attrs, body ->
-        out << g.render(plugin:'freshSecurity', template:'/_fresh_security/signupForm')
+        out << g.render(template:'/_fresh_security/signupForm')
     }
     
     def forgotPasswordForm = { attrs, body ->
-        out << g.render(plugin:'freshSecurity', template:'/_fresh_security/forgotPasswordForm')
+        out << g.render(template:'/_fresh_security/forgotPasswordForm')
     }
     
     def resetPasswordForm = { attrs, body ->
-        out << g.render(plugin:'freshSecurity', template:'/_fresh_security/resetPasswordForm')
+        out << g.render(/*plugin:'freshSecurity', */ template:'/_fresh_security/resetPasswordForm')
     }
 
     def userObject = { attrs ->

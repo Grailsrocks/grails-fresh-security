@@ -105,9 +105,6 @@ class FreshSecurityService implements InitializingBean {
         }
 		def u = findUserByEmail(email)
 		if (u) {
-		    u.credentialsExpired = true
-		    u.save(flush:true)
-        
             def resetMode = grailsApplication.config.plugin.freshSecurity.password.reset.mode
 
             switch (resetMode) {

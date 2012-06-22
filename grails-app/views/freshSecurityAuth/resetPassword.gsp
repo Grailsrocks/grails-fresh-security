@@ -1,7 +1,7 @@
 <html>
 	<head>
 		<title><g:message code="plugin.freshSecurity.reset.password.screen.title"/></title>
-        <theme:layout name="form"/>
+        <theme:layout name="dialog"/>
 	</head>
 	<body>
         <theme:title text="plugin.freshSecurity.reset.password.form.title"/>
