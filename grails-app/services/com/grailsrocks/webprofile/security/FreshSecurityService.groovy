@@ -61,14 +61,24 @@ class FreshSecurityService implements InitializingBean {
     
     @Transactional
     def passwordResetConfirmed(args) {
+        if (log.debugEnabled) {
+            log.debug "User password reset confirmed: ${args}"
+        }
         if (findUserByIdentity(args.id)) { 
             def session = RequestContextHolder.requestAttributes.session
     	    
             session[SESSION_VAR_PASSWORD_RESET_MODE] = true
             session[SESSION_VAR_PASSWORD_RESET_IDENTITY] = args.id
+
+            if (log.infoEnabled) {
+                log.info "User password reset confirmed for [${args}], redirecting to reset password screen"
+            }
             return [controller:'freshSecurityAuth', action:'resetPassword']
         } else {
-            return [controller:'freshSecurityAuth', action:'badRequest']
+            if (log.errorEnabled) {
+                log.error "User password reset confirmed for [${args}] but user could not be found with the identity [${args.id}]"
+            }
+            return [controller:'freshSecurityAuth', action:'badRequest', params:[reason:'password.reset.no.such.user']]
         }
     }
 
