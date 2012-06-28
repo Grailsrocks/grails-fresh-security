@@ -157,7 +157,7 @@ class FreshSecurityAuthController {
     def resetPassword = {
         if (!session[FreshSecurityService.SESSION_VAR_PASSWORD_RESET_MODE]) {
             displayFlashMessage text:FreshSecurityService.PLUGIN_SCOPE+'password.reset.not.allowed', type:'error'
-            redirect(action:'badRequest')
+            redirect(action:'badRequest', params:[reason:'password.reset.not.allowed'])
         } 
     }
     
