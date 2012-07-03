@@ -14,8 +14,8 @@ class FreshSecurityService implements InitializingBean {
     
     static final String PLUGIN_SCOPE = 'plugin.freshSecurity'
     
-    static final String SESSION_VAR_PASSWORD_RESET_MODE = PLUGIN_SCOPE+'password.reset.mode'
-    static final String SESSION_VAR_PASSWORD_RESET_IDENTITY = PLUGIN_SCOPE+'password.reset.identity'
+    static final String SESSION_VAR_PASSWORD_RESET_MODE = PLUGIN_SCOPE+'.password.reset.mode'
+    static final String SESSION_VAR_PASSWORD_RESET_IDENTITY = PLUGIN_SCOPE+'.password.reset.identity'
     
     static final String PASSWORD_RESET_MODE_GENERATE = "generate"
     static final String PASSWORD_RESET_MODE_SETNEW = "setnew"
@@ -49,17 +49,8 @@ class FreshSecurityService implements InitializingBean {
      * Check user exists, then set session var to indicate that user is in "reset mode" and
      * redirect to password set screen
      */
-    @grails.events.Listener('confirmed') // scope:'emailConfirmation'
-    def emailAddressConfirmed(event) {
-        switch (event.confirmationEvent) {
-            case 'new.user':
-                return newUserConfirmed(event)
-            case 'password.reset': 
-                return passwordResetConfirmed(event)
-        }
-    }
-    
     @Transactional
+    @grails.events.Listener(namespace=FreshSecurityService.PLUGIN_SCOPE, topic='password.reset.confirmed')
     def passwordResetConfirmed(args) {
         if (log.debugEnabled) {
             log.debug "User password reset confirmed: ${args}"
@@ -86,6 +77,7 @@ class FreshSecurityService implements InitializingBean {
      * Mark their account as enabled, redirect them to login screen
      */
     @Transactional
+    @grails.events.Listener(namespace=FreshSecurityService.PLUGIN_SCOPE, topic='new.user.confirmed')
     def newUserConfirmed(args) {
         def user = findUserByIdentity(args.id)
         if (user) { 
@@ -93,7 +85,7 @@ class FreshSecurityService implements InitializingBean {
             
             onNewUserSignedUp(user, null)
 
-            grailsUiHelper.displayFlashMessage text:PLUGIN_SCOPE+'signup.confirm.completed'
+            grailsUiHelper.displayFlashMessage text:PLUGIN_SCOPE+'.signup.confirm.completed'
             def redirectArgs = event('newUserConfirmedPage', user).value
             if (log.debugEnabled) {
                 log.debug "Redirecting new user, app event returned redirect args: ${redirectArgs}"
@@ -160,7 +152,7 @@ class FreshSecurityService implements InitializingBean {
             view:'/email-templates/password-reset-confirmation',
             id:user.identity,
             event:'password.reset',
-            eventScope:PLUGIN_SCOPE)
+            eventNamespace:PLUGIN_SCOPE)
     }
     
     void logout() {
@@ -324,7 +316,7 @@ class FreshSecurityService implements InitializingBean {
             view:'/email-templates/signup-confirmation',
             id:user.identity,
             event:'new.user',
-            eventScope:PLUGIN_SCOPE)
+            eventNamespace:PLUGIN_SCOPE)
     }
     
     Class getUserClass() {

@@ -110,7 +110,7 @@ class FreshSecurityAuthController {
 	}
 
     def firstLogin = {
-        displayMessage text:FreshSecurityService.PLUGIN_SCOPE+'first.login', type:'info'
+        displayMessage text:FreshSecurityService.PLUGIN_SCOPE+'.first.login', type:'info'
     }
     
     def badRequest = {
@@ -129,13 +129,13 @@ class FreshSecurityAuthController {
                 if (log.warnEnabled) {
                     log.warn "User forgot password but email [${form.email}] is not associated with any user account"
                 }
-                displayMessage text:FreshSecurityService.PLUGIN_SCOPE+'forgot.password.unknown.email'
+                displayMessage text:FreshSecurityService.PLUGIN_SCOPE+'.forgot.password.unknown.email'
                 render(view:'forgotPassword', model:[form:form])
             } else {
                 if (log.infoEnabled) {
                     log.info "User password reset confirmation mail sent to email [${form.email}]"
                 }
-                displayFlashMessage text:FreshSecurityService.PLUGIN_SCOPE+'password.reset.confirm.sent'
+                displayFlashMessage text:FreshSecurityService.PLUGIN_SCOPE+'.password.reset.confirm.sent'
                 goToDefaultPage()
             }
         } else {
@@ -156,7 +156,7 @@ class FreshSecurityAuthController {
     
     def resetPassword = {
         if (!session[FreshSecurityService.SESSION_VAR_PASSWORD_RESET_MODE]) {
-            displayFlashMessage text:FreshSecurityService.PLUGIN_SCOPE+'password.reset.not.allowed', type:'error'
+            displayFlashMessage text:FreshSecurityService.PLUGIN_SCOPE+'.password.reset.not.allowed', type:'error'
             redirect(action:'badRequest', params:[reason:'password.reset.not.allowed'])
         } 
     }
@@ -170,7 +170,7 @@ class FreshSecurityAuthController {
             if (log.infoEnabled) {
                 log.info "Request to reset password but user is not in reset mode"
             }
-            displayFlashMessage text:FreshSecurityService.PLUGIN_SCOPE+'password.reset.not.allowed', type:'error'
+            displayFlashMessage text:FreshSecurityService.PLUGIN_SCOPE+'.password.reset.not.allowed', type:'error'
             redirect(action:'badRequest')
         } else {
             if (!form.hasErrors()) {
@@ -179,7 +179,7 @@ class FreshSecurityAuthController {
                 }
                 freshSecurityService.resetPassword(userIdentity, form.newPassword)
                 session[FreshSecurityService.SESSION_VAR_PASSWORD_RESET_MODE] = false
-                displayFlashMessage text:FreshSecurityService.PLUGIN_SCOPE+'password.reset.complete'
+                displayFlashMessage text:FreshSecurityService.PLUGIN_SCOPE+'.password.reset.complete'
                 def redirectArgs = event('passwordResetCompletionPage', userIdentity).value
                 if (redirectArgs) {
                     redirect(redirectArgs)
@@ -190,7 +190,7 @@ class FreshSecurityAuthController {
                 if (log.infoEnabled) {
                     log.info "Request to reset password for user [${userIdentity}] had errors"
                 }
-                displayMessage text:FreshSecurityService.PLUGIN_SCOPE+'password.reset.invalid', type:'error'
+                displayMessage text:FreshSecurityService.PLUGIN_SCOPE+'.password.reset.invalid', type:'error'
                 // Blank out the password values
                 form.newPassword = ''
                 form.confirmPassword = ''
@@ -267,7 +267,7 @@ class FreshSecurityAuthController {
                 log.debug "User signed up, redirecting to post signup url: ${user.identity}"
             }
             // @todo adjust this message if in dev and they did confirm bypass, make it clearer
-            displayFlashMessage text:FreshSecurityService.PLUGIN_SCOPE+(user.accountLocked ? 'signup.confirm.required' : 'signup.complete'), 
+            displayFlashMessage text:FreshSecurityService.PLUGIN_SCOPE+(user.accountLocked ? '.signup.confirm.required' : '.signup.complete'), 
                 type:'info'
             goToPostLoginPage()
 		}
