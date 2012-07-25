@@ -1,7 +1,5 @@
 <p:requiresBean name="loginForm" class="com.grailsrocks.webprofile.security.forms.LoginFormCommand"/>
 
-<strong>Debug: user name is ${loginForm.identity}</strong>
-
 <ui:form method="post" id="loginForm" url="${createLink(uri: '/j_spring_security_check')}">
     <ui:fieldGroup>
         <ui:field bean="${loginForm}" name="identity" tabindex="1"/>
