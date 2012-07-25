@@ -96,7 +96,7 @@ class FreshSecurityAuthController {
 		String msg = ''
 		def exception = session[WebAttributes.AUTHENTICATION_EXCEPTION]
 		if (exception) {
-		    msg = "error."+exception.class.simpleName
+		    msg = ".error."+exception.class.simpleName
 		}
 
 		if (springSecurityService.isAjax(request)) {
