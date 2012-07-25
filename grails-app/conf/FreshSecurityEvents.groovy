@@ -35,4 +35,8 @@ events = {
      * @return Map of redirect() arguments. If empty or null, sends them to default post login page
      */
     'newUserConfirmedPage'()
+    
+    // Private events used internally to hook into email confirmation
+    'new.user.confirmed'(namespace:'plugin.freshSecurity')
+    'password.reset.confirmed'(namespace:'plugin.freshSecurity')
 }

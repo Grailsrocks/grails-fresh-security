@@ -7,6 +7,7 @@ import org.codehaus.groovy.grails.plugins.springsecurity.NullSaltSource
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.core.userdetails.UsernameNotFoundException
 import java.util.regex.Pattern
 
 class FreshSecurityService implements InitializingBean {
@@ -215,6 +216,7 @@ class FreshSecurityService implements InitializingBean {
                     throw new IllegalArgumentException("Fresh Security is configured to send email confirmations but the email-confirmation plugin is not installed")
                 }
 	        }
+            
 	        if (request) {
     	        request.session['plugin.fresh.security.new.sign.up'] = true
     	        request.session['plugin.fresh.security.email.confirm.pending'] = confirmEmail
@@ -275,30 +277,31 @@ class FreshSecurityService implements InitializingBean {
     @Transactional
     boolean deleteUser(identity) {
         if (log.infoEnabled) {
-            log.info "Removing user account: [${identity}]"
+            log.info "Removing user account [${identity}]"
         }
         
-        def user = userDetailsService.loadUserByUsername(identity) 
-        if (user) {
-            // Delete the app's object
-            def userObj = user.userObject
-            if (userObj) {
-                userObj.delete(flush:true)
-            }
-            
-            // Delete our security user object
-            def dbUser = findUserByIdentity(identity)
-            if (dbUser) {
-                dbUser.delete(flush:true)
-            }
-        
-            return true
-        } else {
-            if (log.infoEnabled) {
-                log.info "Could not remove user account [${identity}], no such account"
-            }
+        def user
+        try {
+            user = userDetailsService.loadUserByUsername(identity) 
+
+        } catch (UsernameNotFoundException unfe) {
+            log.warn "Cannot remove user account [${identity}] because it does not exist"
             return false
         }
+
+        // Delete the app's object
+        def userObj = user.userObject
+        if (userObj) {
+            userObj.delete(flush:true)
+        }
+        
+        // Delete our security user object
+        def dbUser = findUserByIdentity(identity)
+        if (dbUser) {
+            dbUser.delete(flush:true)
+        }
+    
+        return true
     }
 
     void sendNewAccountConfirmationEmail(user) {

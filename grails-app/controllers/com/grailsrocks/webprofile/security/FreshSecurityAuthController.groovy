@@ -48,7 +48,7 @@ class FreshSecurityAuthController {
 			return
 		}
 
-        def userName = session['SPRING_SECURITY_LAST_USERNAME']
+        def userName = session['SPRING_SECURITY_LAST_USERNAME']?.decodeHTML() // Weird, Spring Sec stores the value as HTML escaped
         
 		String view = 'login'
 		String postUrl = "${request.contextPath}${config.apf.filterProcessesUrl}"
@@ -93,7 +93,6 @@ class FreshSecurityAuthController {
 	def loginFail = {
         // @todo make this not suck
         
-		def username = session[UsernamePasswordAuthenticationFilter.SPRING_SECURITY_LAST_USERNAME_KEY]
 		String msg = ''
 		def exception = session[WebAttributes.AUTHENTICATION_EXCEPTION]
 		if (exception) {

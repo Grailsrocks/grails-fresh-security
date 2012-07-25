@@ -13,7 +13,9 @@
         <ui:field bean="${form}" name="password" type="password" tabindex="3"/>
         <ui:field bean="${form}" name="confirmPassword" type="password" tabindex="4"/>
         <fresh:ifNotConfirmSignup>
-            <ui:field bean="${form}" name="rememberMe" tabindex="5"/>
+            <fresh:ifRememberMeAllowed>
+                <ui:field bean="${form}" name="rememberMe" tabindex="5"/>
+            </fresh:ifRememberMeAllowed>
         </fresh:ifNotConfirmSignup>
         <ui:field bean="${form}" name="confirmBypass" tabindex="6"/>
     </ui:fieldGroup>    

@@ -9,7 +9,7 @@ import com.grailsrocks.webprofile.security.*
 
 class FreshSecurityGrailsPlugin {
     // the plugin version
-    def version = "1.0.1-SNAPSHOT"
+    def version = "1.0.2-SNAPSHOT"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.3.7 > *"
 
@@ -90,6 +90,7 @@ Security that "just works", backed by Spring Security
             (v == null || !(v instanceof List)) ? 'A role list is required' : null
         })
         'signup.allowed'(defaultValue:true)
+        'remember.me.allowed'(defaultValue:true)
         'confirm.email.on.signup'(defaultValue:false, validator: { v ->
             if (v) {
                 def hasEmailConf = PluginManagerHolder.pluginManager.hasGrailsPlugin('email-confirmation')
@@ -100,10 +101,9 @@ Security that "just works", backed by Spring Security
         })
         'identity.mode'(defaultValue:'userid', validator: { v -> v in ['email', 'userid'] ? null : 'Must be [email] or [userid]'} )
         'password.reset.mode'(defaultValue:'setnew', validator: { v -> v in ['setnew', 'generate'] ? null : 'Must be [setnew] or [generate]'})
-        'account.locked.until.email.confirm'(defaultValue:'false')
+        'account.locked.until.email.confirm'(defaultValue:false)
         'post.login.url'(defaultValue:[uri:'/'])
         'post.signup.url'(defaultValue:[uri:'/'])
-//        'post.login.always_default'(defaultValue:true)
         'bad.confirmation.url'(defaultValue:[uri:'/bad-confirmation'])
         'user.object.class.name'(defaultValue:'')
         'allow.confirm.bypass'(defaultValue:false, validator: { v -> (v instanceof Boolean) || (v instanceof Pattern) ? null : 'Must be boolean or Pattern'})
@@ -152,6 +152,7 @@ Security that "just works", backed by Spring Security
             
         }
         
+        // Configure ourselves based on other app config settings
         freshSecurity {
             // Force confirm email to true if using email as id
             if (config.plugin.freshSecurity.identity.mode == 'email') {

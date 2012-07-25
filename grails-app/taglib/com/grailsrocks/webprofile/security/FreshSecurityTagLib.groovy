@@ -45,6 +45,12 @@ class FreshSecurityTagLib {
 		out << p.smartLink(attrs)
     }
 
+    def ifRememberMeAllowed = { attrs, body ->
+        if (pluginConfig.remember.me.allowed) {
+            out << body()
+        }
+    }
+
     def ifSignupAllowed = { attrs, body ->
         if (pluginConfig.signup.allowed) {
             out << body()
