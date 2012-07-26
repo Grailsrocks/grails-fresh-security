@@ -179,7 +179,7 @@ class FreshSecurityAuthController {
                 freshSecurityService.resetPassword(userIdentity, form.newPassword)
                 session[FreshSecurityService.SESSION_VAR_PASSWORD_RESET_MODE] = false
                 displayFlashMessage text:FreshSecurityService.PLUGIN_SCOPE+'.password.reset.complete'
-                def redirectArgs = event('passwordResetCompletionPage', userIdentity).value
+                def redirectArgs = event(topic:'passwordResetCompletionPage', namespace:FreshSecurityService.PLUGIN_EVENT_NAMESPACE, data:userIdentity).value
                 if (redirectArgs) {
                     redirect(redirectArgs)
                 } else {

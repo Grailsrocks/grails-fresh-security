@@ -14,6 +14,7 @@ class FreshSecurityService implements InitializingBean {
     static transactional = false
     
     static final String PLUGIN_SCOPE = 'plugin.freshSecurity'
+    static final String PLUGIN_EVENT_NAMESPACE = 'freshSecurity'
     
     static final String SESSION_VAR_PASSWORD_RESET_MODE = PLUGIN_SCOPE+'.password.reset.mode'
     static final String SESSION_VAR_PASSWORD_RESET_IDENTITY = PLUGIN_SCOPE+'.password.reset.identity'
@@ -51,7 +52,7 @@ class FreshSecurityService implements InitializingBean {
      * redirect to password set screen
      */
     @Transactional
-    @grails.events.Listener(namespace=FreshSecurityService.PLUGIN_SCOPE, topic='password.reset.confirmed')
+    @grails.events.Listener(namespace=FreshSecurityService.PLUGIN_EVENT_NAMESPACE, topic='password.reset.confirmed')
     def passwordResetConfirmed(args) {
         if (log.debugEnabled) {
             log.debug "User password reset confirmed: ${args}"
@@ -78,7 +79,7 @@ class FreshSecurityService implements InitializingBean {
      * Mark their account as enabled, redirect them to login screen
      */
     @Transactional
-    @grails.events.Listener(namespace=FreshSecurityService.PLUGIN_SCOPE, topic='new.user.confirmed')
+    @grails.events.Listener(namespace=FreshSecurityService.PLUGIN_EVENT_NAMESPACE, topic='new.user.confirmed')
     def newUserConfirmed(args) {
         def user = findUserByIdentity(args.id)
         if (user) { 
@@ -87,7 +88,7 @@ class FreshSecurityService implements InitializingBean {
             onNewUserSignedUp(user, null)
 
             grailsUiHelper.displayFlashMessage text:PLUGIN_SCOPE+'.signup.confirm.completed'
-            def redirectArgs = event('newUserConfirmedPage', user).value
+            def redirectArgs = event(topic:'newUserConfirmedPage', namespace:FreshSecurityService.PLUGIN_EVENT_NAMESPACE, data:user).value
             if (log.debugEnabled) {
                 log.debug "Redirecting new user, app event returned redirect args: ${redirectArgs}"
             }
@@ -137,7 +138,7 @@ class FreshSecurityService implements InitializingBean {
             user.password = encodePassword(user.identity, newPassword)
             user.save(flush:true) // Seems like a good plan, right?
             
-            event('passwordWasReset', user)
+            event(topic:'passwordWasReset', namespace:FreshSecurityService.PLUGIN_EVENT_NAMESPACE, data:user)
         } else {
             if (log.infoEnabled) {
                 log.info "Could not reset password for user [${userId}], user not found"
@@ -153,7 +154,7 @@ class FreshSecurityService implements InitializingBean {
             view:'/email-templates/password-reset-confirmation',
             id:user.identity,
             event:'password.reset',
-            eventNamespace:PLUGIN_SCOPE)
+            eventNamespace:PLUGIN_EVENT_NAMESPACE)
     }
     
     void logout() {
@@ -237,32 +238,36 @@ class FreshSecurityService implements InitializingBean {
     }
 
     @Transactional
-    void onNewUserSignedUp(user, userObject) {
+    void onNewUserSignedUp(SecUser user, userObject) {
         if (log.infoEnabled) {
             log.info "New user signed up: [${user.identity}]"
         }
         
         boolean createdUserObject
-        if (!userObject && !user.userObjectId) {
-            def className = pluginConfig.user.object.class.name
-            if (className) {
-                if (log.infoEnabled) {
-                    log.info "Creating new application user object for [${user.identity}] of type [${className}]"
+        if (!userObject) {
+            if (!user.userObjectId) {
+                def className = pluginConfig.user.object.class.name
+                if (className) {
+                    if (log.infoEnabled) {
+                        log.info "Creating new application user object for [${user.identity}] of type [${className}]"
+                    }
+                    def cls = grailsApplication.classLoader.loadClass(className)
+                    userObject = cls.newInstance()
+                    createdUserObject = true
                 }
-                def cls = grailsApplication.classLoader.loadClass(className)
-                userObject = cls.newInstance()
-                createdUserObject = true
-            }
         
     
-            if (log.infoEnabled) {
-                log.debug "Populating new application user object for [${user.identity}] of type [${className}]..."
+                if (log.infoEnabled) {
+                    log.debug "Populating new application user object for [${user.identity}] of type [${className}]..."
+                }
+            } else {
+                userObject = user.userObject
             }
         }
         
         // Let app unit user object or other side effects, or define user object
         def eventObj = new NewUserEvent(user:user, userObject:userObject)
-        event('newUserCreated', eventObj)
+        event(topic:'newUserCreated', namespace:FreshSecurityService.PLUGIN_EVENT_NAMESPACE, data:eventObj)
         
         if (eventObj.userObject) {
             if (eventObj.userObject.save(flush:true)) {
@@ -319,7 +324,7 @@ class FreshSecurityService implements InitializingBean {
             view:'/email-templates/signup-confirmation',
             id:user.identity,
             event:'new.user',
-            eventNamespace:PLUGIN_SCOPE)
+            eventNamespace:PLUGIN_EVENT_NAMESPACE)
     }
     
     Class getUserClass() {
