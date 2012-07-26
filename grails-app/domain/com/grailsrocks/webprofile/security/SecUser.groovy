@@ -4,7 +4,7 @@ package com.grailsrocks.webprofile.security
  * The domain class encapsulating the user
  */
 class SecUser {
-    static transients = ['userObject']
+    static transients = ['userObject', 'grailsApplication']
     
     String identity
 
@@ -24,6 +24,8 @@ class SecUser {
     
     String userObjectClassName
     String userObjectId
+    
+    def grailsApplication
     
     static constraints = {
         identity(unique:true, nullable: false, blank: false, maxSize:80)
@@ -58,4 +60,16 @@ class SecUser {
 	        userObjectId = null
         }
 	}
+	
+	def getUserObject() {
+        if (log.debugEnabled) {
+            log.debug "Getting userObject for user [${identity}], class of userObject is [${userObjectClassName}], id is ${userObjectId} (${userObjectId?.getClass()})"
+        }
+        def userObjectClass
+        if (userObjectClassName) {
+            userObjectClass = grailsApplication.classLoader.loadClass(userObjectClassName)
+        }
+        userObjectId ? userObjectClass?.get(userObjectId) : null
+    }
+    
 }
