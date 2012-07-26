@@ -4,8 +4,8 @@ import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import org.apache.commons.logging.LogFactory
 
-class FreshSecurityUserDetails implements UserDetails {
-    def log = LogFactory.getLog(FreshSecurityUserDetails )
+class FreshSecurityUserDetails implements UserDetails, Serializable {
+    transient def log = LogFactory.getLog(FreshSecurityUserDetails )
 
     final Collection<GrantedAuthority> authorities
     final String password
