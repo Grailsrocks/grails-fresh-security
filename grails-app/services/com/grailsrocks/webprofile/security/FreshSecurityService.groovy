@@ -13,11 +13,10 @@ import java.util.regex.Pattern
 class FreshSecurityService implements InitializingBean {
     static transactional = false
     
-    static final String PLUGIN_SCOPE = 'plugin.freshSecurity'
     static final String PLUGIN_EVENT_NAMESPACE = 'freshSecurity'
     
-    static final String SESSION_VAR_PASSWORD_RESET_MODE = PLUGIN_SCOPE+'.password.reset.mode'
-    static final String SESSION_VAR_PASSWORD_RESET_IDENTITY = PLUGIN_SCOPE+'.password.reset.identity'
+    static final String SESSION_VAR_PASSWORD_RESET_MODE = 'password.reset.mode'
+    static final String SESSION_VAR_PASSWORD_RESET_IDENTITY = 'password.reset.identity'
     
     static final String PASSWORD_RESET_MODE_GENERATE = "generate"
     static final String PASSWORD_RESET_MODE_SETNEW = "setnew"
@@ -58,7 +57,7 @@ class FreshSecurityService implements InitializingBean {
             log.debug "User password reset confirmed: ${args}"
         }
         if (findUserByIdentity(args.id)) { 
-            def session = RequestContextHolder.requestAttributes.session
+            def session = grailsUiExtensions.getPluginSession('platformUi')
     	    
             session[SESSION_VAR_PASSWORD_RESET_MODE] = true
             session[SESSION_VAR_PASSWORD_RESET_IDENTITY] = args.id
@@ -87,7 +86,7 @@ class FreshSecurityService implements InitializingBean {
             
             onNewUserSignedUp(user, null)
 
-            grailsUiHelper.displayFlashMessage text:PLUGIN_SCOPE+'.signup.confirm.completed'
+            grailsUiHelper.displayFlashMessage text:'signup.confirm.completed'
             def redirectArgs = event(topic:'newUserConfirmedPage', namespace:FreshSecurityService.PLUGIN_EVENT_NAMESPACE, data:user).value
             if (log.debugEnabled) {
                 log.debug "Redirecting new user, app event returned redirect args: ${redirectArgs}"
@@ -219,8 +218,9 @@ class FreshSecurityService implements InitializingBean {
 	        }
             
 	        if (request) {
-    	        request.session['plugin.fresh.security.new.sign.up'] = true
-    	        request.session['plugin.fresh.security.email.confirm.pending'] = confirmEmail
+    	        def session = grailsUiExtensions.getPluginSession('platformUi')
+    	        session['new.sign.up'] = true
+    	        session['email.confirm.pending'] = confirmEmail
 	        }
 
             // Force the new user to be logged in if email confirmation is not required

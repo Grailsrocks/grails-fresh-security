@@ -63,22 +63,9 @@ class FreshSecurityTagLib {
         }
     }
     
-    def ifUiMessage = { attrs, body ->
-        if (flash[FreshSecurityService.FLASH_VAR_UI_MESSAGE]) {
-            out << body()
-        }
-    }
-
     def ifIdentityMode = { attrs, body ->
         if (pluginConfig.identity.mode == attrs.value) {
             out << body()
-        }
-    }
-
-    def uiMessage = { attrs ->
-        def msg = flash[FreshSecurityService.FLASH_VAR_UI_MESSAGE]
-        if (msg) {
-            out << g.message(code:msg, encodeAs:'HTML')
         }
     }
 }

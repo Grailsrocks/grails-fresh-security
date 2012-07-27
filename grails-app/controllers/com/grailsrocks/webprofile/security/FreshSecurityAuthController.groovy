@@ -103,13 +103,13 @@ class FreshSecurityAuthController {
 			render([error: msg] as JSON)
 		}
 		else {
-            displayFlashMessage text:FreshSecurityService.PLUGIN_SCOPE+msg, type:'error'
+            displayFlashMessage text:msg, type:'error'
 			redirect action: 'login', params: params
 		}
 	}
 
     def firstLogin = {
-        displayMessage text:FreshSecurityService.PLUGIN_SCOPE+'.first.login', type:'info'
+        displayMessage text:'first.login', type:'info'
     }
     
     def badRequest = {
@@ -128,13 +128,13 @@ class FreshSecurityAuthController {
                 if (log.warnEnabled) {
                     log.warn "User forgot password but email [${form.email}] is not associated with any user account"
                 }
-                displayMessage text:FreshSecurityService.PLUGIN_SCOPE+'.forgot.password.unknown.email'
+                displayMessage text:'forgot.password.unknown.email'
                 render(view:'forgotPassword', model:[form:form])
             } else {
                 if (log.infoEnabled) {
                     log.info "User password reset confirmation mail sent to email [${form.email}]"
                 }
-                displayFlashMessage text:FreshSecurityService.PLUGIN_SCOPE+'.password.reset.confirm.sent'
+                displayFlashMessage text:'password.reset.confirm.sent'
                 goToDefaultPage()
             }
         } else {
@@ -154,22 +154,22 @@ class FreshSecurityAuthController {
     }
     
     def resetPassword = {
-        if (!session[FreshSecurityService.SESSION_VAR_PASSWORD_RESET_MODE]) {
-            displayFlashMessage text:FreshSecurityService.PLUGIN_SCOPE+'.password.reset.not.allowed', type:'error'
+        if (!pluginSession[FreshSecurityService.SESSION_VAR_PASSWORD_RESET_MODE]) {
+            displayFlashMessage text:'password.reset.not.allowed', type:'error'
             redirect(action:'badRequest', params:[reason:'password.reset.not.allowed'])
         } 
     }
     
     def doResetPassword = { PasswordResetFormCommand form ->
-        def userIdentity = session[FreshSecurityService.SESSION_VAR_PASSWORD_RESET_IDENTITY]
+        def userIdentity = pluginSession[FreshSecurityService.SESSION_VAR_PASSWORD_RESET_IDENTITY]
         if (log.infoEnabled) {
             log.info "Request to reset password for user [${userIdentity}]"
         }
-        if (!session[FreshSecurityService.SESSION_VAR_PASSWORD_RESET_MODE]) {
+        if (!pluginSession[FreshSecurityService.SESSION_VAR_PASSWORD_RESET_MODE]) {
             if (log.infoEnabled) {
                 log.info "Request to reset password but user is not in reset mode"
             }
-            displayFlashMessage text:FreshSecurityService.PLUGIN_SCOPE+'.password.reset.not.allowed', type:'error'
+            displayFlashMessage text:'password.reset.not.allowed', type:'error'
             redirect(action:'badRequest')
         } else {
             if (!form.hasErrors()) {
@@ -177,8 +177,8 @@ class FreshSecurityAuthController {
                     log.info "Request to reset password for user [${userIdentity}] being processed"
                 }
                 freshSecurityService.resetPassword(userIdentity, form.newPassword)
-                session[FreshSecurityService.SESSION_VAR_PASSWORD_RESET_MODE] = false
-                displayFlashMessage text:FreshSecurityService.PLUGIN_SCOPE+'.password.reset.complete'
+                pluginSession[FreshSecurityService.SESSION_VAR_PASSWORD_RESET_MODE] = false
+                displayFlashMessage text:'password.reset.complete'
                 def redirectArgs = event(topic:'passwordResetCompletionPage', namespace:FreshSecurityService.PLUGIN_EVENT_NAMESPACE, data:userIdentity).value
                 if (redirectArgs) {
                     redirect(redirectArgs)
@@ -189,7 +189,7 @@ class FreshSecurityAuthController {
                 if (log.infoEnabled) {
                     log.info "Request to reset password for user [${userIdentity}] had errors"
                 }
-                displayMessage text:FreshSecurityService.PLUGIN_SCOPE+'.password.reset.invalid', type:'error'
+                displayMessage text:'password.reset.invalid', type:'error'
                 // Blank out the password values
                 form.newPassword = ''
                 form.confirmPassword = ''
@@ -266,7 +266,7 @@ class FreshSecurityAuthController {
                 log.debug "User signed up, redirecting to post signup url: ${user.identity}"
             }
             // @todo adjust this message if in dev and they did confirm bypass, make it clearer
-            displayFlashMessage text:FreshSecurityService.PLUGIN_SCOPE+(user.accountLocked ? '.signup.confirm.required' : '.signup.complete'), 
+            displayFlashMessage text:(user.accountLocked ? '.signup.confirm.required' : '.signup.complete'), 
                 type:'info'
             goToPostLoginPage()
 		}
