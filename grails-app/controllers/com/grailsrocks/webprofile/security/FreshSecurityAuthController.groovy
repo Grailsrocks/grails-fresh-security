@@ -49,6 +49,7 @@ class FreshSecurityAuthController {
 		}
 
         def userName = session['SPRING_SECURITY_LAST_USERNAME']?.decodeHTML() // Weird, Spring Sec stores the value as HTML escaped
+        println "LOGIN - previous username: ${session['SPRING_SECURITY_LAST_USERNAME']}"
         
 		String view = 'login'
 		String postUrl = "${request.contextPath}${config.apf.filterProcessesUrl}"
@@ -95,8 +96,11 @@ class FreshSecurityAuthController {
         
 		String msg = ''
 		def exception = session[WebAttributes.AUTHENTICATION_EXCEPTION]
+		
+		println "Login fail: ${exception}"
+		
 		if (exception) {
-		    msg = ".error."+exception.class.simpleName
+		    msg = "error."+exception.class.simpleName
 		}
 
 		if (springSecurityService.isAjax(request)) {
