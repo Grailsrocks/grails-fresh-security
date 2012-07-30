@@ -25,7 +25,7 @@ class FreshSecurityService implements InitializingBean {
     def grailsApplication
     def springSecurityService
     def emailConfirmationService
-    def grailsUiHelper
+    def grailsUiExtensions
     def userDetailsService
     
     @Transactional
@@ -86,7 +86,7 @@ class FreshSecurityService implements InitializingBean {
             
             onNewUserSignedUp(user, null)
 
-            grailsUiHelper.displayFlashMessage(text:'signup.confirm.completed', 'freshSecurity')
+            grailsUiExtensions.displayFlashMessage(text:'signup.confirm.completed', 'freshSecurity')
             def redirectArgs = event(topic:'newUserConfirmedPage', namespace:FreshSecurityService.PLUGIN_EVENT_NAMESPACE, data:user).value
             if (log.debugEnabled) {
                 log.debug "Redirecting new user, app event returned redirect args: ${redirectArgs}"
