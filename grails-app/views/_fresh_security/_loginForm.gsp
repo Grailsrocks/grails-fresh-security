@@ -12,7 +12,8 @@
     <ui:actions>
         <ui:button type="submit" tabindex="4" text="action.auth.login"/>
         <fresh:ifSignupAllowed>
-            or <p:smartLink controller="auth" action="signup"/>
+            <p:text code="ui.or" encodeAs="HTML"/>
+            <p:smartLink controller="auth" action="signup"/>
         </fresh:ifSignupAllowed>
     </ui:actions>
 </ui:form>

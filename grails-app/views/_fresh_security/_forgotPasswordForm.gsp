@@ -9,7 +9,7 @@
 
      <ui:actions>
         <ui:button kind="button" mode="primary" tabindex="2" text="action.auth.doForgotPassword"/>
-        <g:message code="ui.or" encodeAs="HTML"/>
+        <p:text code="ui.or" encodeAs="HTML"/>
         <ui:button kind="anchor" mode="secondary" text="ui.cancel" uri="/"/>        
      </ui:actions>
 </ui:form>

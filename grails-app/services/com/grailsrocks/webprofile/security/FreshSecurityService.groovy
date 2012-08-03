@@ -135,6 +135,10 @@ class FreshSecurityService implements InitializingBean {
                 log.info "Resetting password for user [${userId}]"
             }
             user.password = encodePassword(user.identity, newPassword)
+            user.accountLocked = false
+            user.credentialsLocked = false
+            user.credentialsExpired = false
+            user.passwordExpired = false
             user.save(flush:true) // Seems like a good plan, right?
             
             event(topic:'passwordWasReset', namespace:FreshSecurityService.PLUGIN_EVENT_NAMESPACE, data:user)
