@@ -10,7 +10,7 @@
     </ui:fieldGroup>
      
     <ui:actions>
-        <ui:button type="submit" tabindex="4" text="action.auth.login"/>
+        <ui:button type="submit" tabindex="4" mode="primary" text="action.auth.login"/>
         <fresh:ifSignupAllowed>
             <p:text code="ui.or" encodeAs="HTML"/>
             <p:smartLink controller="auth" action="signup"/>

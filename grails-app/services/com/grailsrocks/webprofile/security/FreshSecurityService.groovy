@@ -87,7 +87,7 @@ class FreshSecurityService implements InitializingBean {
             onNewUserSignedUp(user, null)
 
             grailsUiExtensions.displayFlashMessage(text:'signup.confirm.completed', 'freshSecurity')
-            def redirectArgs = event(topic:'newUserConfirmedPage', namespace:FreshSecurityService.PLUGIN_EVENT_NAMESPACE, data:user).value
+            def redirectArgs = event(topic:'newUserConfirmedPage', namespace:FreshSecurityService.PLUGIN_EVENT_NAMESPACE, data:user, params:[fork:false]).value
             if (log.debugEnabled) {
                 log.debug "Redirecting new user, app event returned redirect args: ${redirectArgs}"
             }
@@ -140,7 +140,7 @@ class FreshSecurityService implements InitializingBean {
             user.passwordExpired = false
             user.save(flush:true) // Seems like a good plan, right?
             
-            event(topic:'passwordWasReset', namespace:FreshSecurityService.PLUGIN_EVENT_NAMESPACE, data:user)
+            event(topic:'passwordWasReset', namespace:FreshSecurityService.PLUGIN_EVENT_NAMESPACE, data:user, params:[fork:false])
         } else {
             if (log.infoEnabled) {
                 log.info "Could not reset password for user [${userId}], user not found"
@@ -270,7 +270,7 @@ class FreshSecurityService implements InitializingBean {
         
         // Let app unit user object or other side effects, or define user object
         def eventObj = new NewUserEvent(user:user, userObject:userObject)
-        event(topic:'newUserCreated', namespace:FreshSecurityService.PLUGIN_EVENT_NAMESPACE, data:eventObj)
+        event(topic:'newUserCreated', namespace:FreshSecurityService.PLUGIN_EVENT_NAMESPACE, data:eventObj, params:[fork:false])
         
         if (eventObj.userObject) {
             if (eventObj.userObject.save(flush:true)) {

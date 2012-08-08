@@ -6,6 +6,8 @@
     <ui:message type="error"><p><g:message code="plugin.freshSecurity.reset.password.screen.has.errors"/></p></ui:message>
 </g:if>
 
+<ui:displayMessage/>
+
 <ui:form method="post" id="passwordResetForm" url="[action:'doResetPassword', controller:'auth']">
     <ui:fieldGroup>
         <ui:field bean="${form}" name="newPassword" type="password" tabindex="3"/>

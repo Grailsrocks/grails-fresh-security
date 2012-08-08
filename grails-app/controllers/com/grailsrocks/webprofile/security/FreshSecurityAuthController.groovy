@@ -157,7 +157,7 @@ class FreshSecurityAuthController {
     def resetPassword = {
         if (!pluginSession[FreshSecurityService.SESSION_VAR_PASSWORD_RESET_MODE]) {
             displayFlashMessage text:'password.reset.not.allowed', type:'error'
-            redirect(action:'badRequest', params:[reason:'password.reset.not.allowed'])
+            redirect(action:'badRequest')
         } 
     }
     
@@ -190,7 +190,6 @@ class FreshSecurityAuthController {
                 if (log.infoEnabled) {
                     log.info "Request to reset password for user [${userIdentity}] had errors"
                 }
-                displayMessage text:'password.reset.invalid', type:'error'
                 // Blank out the password values
                 form.newPassword = ''
                 form.confirmPassword = ''

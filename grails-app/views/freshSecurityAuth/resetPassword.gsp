@@ -6,7 +6,6 @@
 	<body>
         <theme:title text="plugin.freshSecurity.reset.password.form.title"/>
 	    <theme:zone name="body">
-            <ui:displayMessage/>
 	        <fresh:resetPasswordForm/>
         </theme:zone>
 	</body>

@@ -6,8 +6,8 @@
 	<body>
         <theme:title text="plugin.freshSecurity.bad.request.title"/>
 	    <theme:zone name="body">
-            <ui:displayMessage/>
 	        <p>Sorry, something went wrong</p>
+            <ui:displayMessage/>
         </theme:zone>
 	</body>
 </html>
