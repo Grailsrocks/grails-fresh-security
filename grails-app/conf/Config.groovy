@@ -1,3 +1,5 @@
+
+plugin.freshSecurity.identity.mode = "email"
 // configuration for plugin testing - will not be included in the plugin zip
 
 log4j = {
@@ -30,6 +32,8 @@ grails.views.default.codec="none" // none, html, base64
 grails.views.gsp.encoding="UTF-8"
 
 grails.theme.default.theme = 'Bootstrap'
+
+plugin.freshSecurity.identity.mode = "email"
 
 environments {
     development {

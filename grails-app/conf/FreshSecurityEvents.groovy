@@ -9,7 +9,7 @@ events = {
      *
      * @return none
      */
-    'newUserCreated'()
+    'newUserCreated'(fork:false)
     
     /*
      * Sent when a user has successfully reset their password.
@@ -17,7 +17,7 @@ events = {
      * @param data The FreshSecurity domain instance of the user
      * @return none
      */
-    'passwordWasReset'()
+    'passwordWasReset'(fork:false)
 
     /*
      * Sent when a user has successfully reset their password in the UI and needs to be redirected
@@ -26,7 +26,7 @@ events = {
      * @param data The FreshSecurity domain instance of the user
      * @return Map of redirect() arguments. If empty or null, sends them to default post login page
      */
-    'passwordResetCompletionPage'()
+    'passwordResetCompletionPage'(fork:false)
 
     /*
      * Sent when a user has successfully confirmed their account, to get the page it should redirect to
@@ -34,7 +34,7 @@ events = {
      * @param data The FreshSecurity domain instance of the user
      * @return Map of redirect() arguments. If empty or null, sends them to default post login page
      */
-    'newUserConfirmedPage'()
+    'newUserConfirmedPage'(fork:false)
     
     // Private events used internally to hook into email confirmation
     'new.user.confirmed'(namespace:'plugin.freshSecurity')

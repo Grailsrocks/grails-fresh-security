@@ -180,7 +180,8 @@ class FreshSecurityAuthController {
                 freshSecurityService.resetPassword(userIdentity, form.newPassword)
                 pluginSession[FreshSecurityService.SESSION_VAR_PASSWORD_RESET_MODE] = false
                 displayFlashMessage text:'password.reset.complete'
-                def redirectArgs = event(topic:'passwordResetCompletionPage', namespace:FreshSecurityService.PLUGIN_EVENT_NAMESPACE, data:userIdentity).value
+                def redirectArgs = event(topic:'passwordResetCompletionPage', 
+                    namespace:FreshSecurityService.PLUGIN_EVENT_NAMESPACE, data:userIdentity).value
                 if (redirectArgs) {
                     redirect(redirectArgs)
                 } else {
@@ -224,22 +225,31 @@ class FreshSecurityAuthController {
     /**
      * Perform signup. We need to support at least four different kinds of sign up:
      *
-     * 1. Username + password, no email
-     * 2. Username + email + password, email confirmed or not
-     * 3. Email + password, email confirmed, username = email
+     * 1. DONE: Username + password, no email
+     * 2. DONE: Username + email + password, email confirmed or not
+     * 3. DONE: Email + password, email confirmed, username = email
      * 4. Twitter/Facebook OAuth signup/auth
      * 5. Open ID
      */
-    def doSignup = { SignupFormCommand form ->
+    def doSignup = { 
         if (!pluginConfig.signup.allowed) {
             response.sendError(400, "No signups allowed")
             return
+        }
+
+        def formClass =  grailsApplication.classLoader.loadClass(pluginConfig.signup.command.class.for.identity.mode[pluginConfig.identity.mode])
+        def form = formClass.newInstance()
+
+        bindData(form, params)
+        if (form.metaClass.hasProperty(form, 'freshSecurityService')) {
+            form.freshSecurityService = freshSecurityService
         }
 
         if (log.debugEnabled) {
             log.debug "User signing up: ${form.identity}"
         }
         
+        form.validate()
         if (form.hasErrors()) {
             if (log.debugEnabled) {
                 log.debug "User signing up, form has errors: ${form.errors}"
@@ -266,7 +276,7 @@ class FreshSecurityAuthController {
                 log.debug "User signed up, redirecting to post signup url: ${user.identity}"
             }
             // @todo adjust this message if in dev and they did confirm bypass, make it clearer
-            displayFlashMessage text:(user.accountLocked ? '.signup.confirm.required' : '.signup.complete'), 
+            displayFlashMessage text:(user.accountLocked ? 'signup.confirm.required' : 'signup.complete'), 
                 type:'info'
             goToPostLoginPage()
 		}

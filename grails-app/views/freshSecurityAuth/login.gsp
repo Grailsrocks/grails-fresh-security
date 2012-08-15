@@ -1,10 +1,10 @@
 <html>
 	<head>
-		<title><g:message code="plugin.freshSecurity.login.screen.title"/></title>
+		<title><p:text code="login.screen.title"/></title>
         <theme:layout name="dialog"/>
 	</head>
 	<body>
-        <theme:title text="plugin.freshSecurity.login.form.title"/>
+        <theme:title text="login.form.title"/>
 	    <theme:zone name="body">
             <ui:displayMessage/>
             <fresh:loginForm/>

@@ -1,6 +1,10 @@
 package com.grailsrocks.webprofile.security
 
+/**
+ * Wrapper for values passed to newUserCreated listeners
+ */
 class NewUserEvent {
-    def user
+    SecUser user
     def userObject
+    def request
 }

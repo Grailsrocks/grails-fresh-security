@@ -17,7 +17,8 @@ class FreshSecurityGrailsPlugin {
     def pluginExcludes = [
         "grails-app/domain/test/**/*.*",
         "grails-app/views/error.gsp",
-        "grails-app/views/index.gsp"
+        "grails-app/views/index.gsp",
+        "grails-app/conf/PluginConfig.groovy"
     ]
 
     def loadAfter = ['springSecurityCore', 'emailConfirmation', 'platformCore'] // We must apply our beans AFTER spring-sec declares its own
@@ -90,6 +91,8 @@ Security that "just works", backed by Spring Security
             (v == null || !(v instanceof List)) ? 'A role list is required' : null
         })
         'signup.allowed'(defaultValue:true)
+        'signup.command.class.for.identity.mode.userid'(defaultValue:'com.grailsrocks.webprofile.security.forms.SignupWithUserIdFormCommand', validator: { v -> v ? null : 'A value is required'})
+        'signup.command.class.for.identity.mode.email'(defaultValue:'com.grailsrocks.webprofile.security.forms.SignupWithEmailFormCommand', validator: { v -> v ? null : 'A value is required'})
         'remember.me.allowed'(defaultValue:true)
         'confirm.email.on.signup'(defaultValue:false, validator: { v ->
             if (v) {
@@ -156,9 +159,10 @@ Security that "just works", backed by Spring Security
         freshSecurity {
             // Force confirm email to true if using email as id
             if (config.plugin.freshSecurity.identity.mode == 'email') {
+                account.locked.until.email.confirm = true
                 confirm.email.on.signup = true
             }
-            if (config.plugin.freshSecurity.account.locked.until.email.confirm == 'email') {
+            if (config.plugin.freshSecurity.account.locked.until.email.confirm) {
                 confirm.email.on.signup = true
             }
         }

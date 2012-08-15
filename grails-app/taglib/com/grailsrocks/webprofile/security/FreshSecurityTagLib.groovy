@@ -13,7 +13,8 @@ class FreshSecurityTagLib {
     }
 
     def signupForm = { attrs, body ->
-        out << g.render(template:'/_fresh_security/signupForm')
+        String commandClass = pluginConfig.signup.command.class.for.identity.mode[pluginConfig.identity.mode]
+        out << g.render(template:'/_fresh_security/signupForm', model:[signupFormClass:commandClass])
     }
     
     def forgotPasswordForm = { attrs, body ->
@@ -21,7 +22,7 @@ class FreshSecurityTagLib {
     }
     
     def resetPasswordForm = { attrs, body ->
-        out << g.render(/*plugin:'freshSecurity', */ template:'/_fresh_security/resetPasswordForm')
+        out << g.render(template:'/_fresh_security/resetPasswordForm')
     }
 
     def userObject = { attrs ->

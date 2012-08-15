@@ -9,6 +9,7 @@ class LoginFormCommand {
     String identity
     String password
     Boolean rememberMe
+
     def freshSecurityService
 
     static constraints = {
