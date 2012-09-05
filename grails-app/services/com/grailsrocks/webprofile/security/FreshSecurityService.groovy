@@ -282,7 +282,7 @@ class FreshSecurityService implements InitializingBean {
                 if (log.infoEnabled) {
                     log.debug "Populating new application user object for [${user.identity}] of type [${className}]..."
                 }
-            } else {I
+            } else {
                 userObject = user.userObject
             }
         }
