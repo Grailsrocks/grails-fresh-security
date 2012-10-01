@@ -162,6 +162,7 @@ Security that "just works", backed by Spring Security
                 account.locked.until.email.confirm = true
                 confirm.email.on.signup = true
             }
+
             if (config.plugin.freshSecurity.account.locked.until.email.confirm) {
                 confirm.email.on.signup = true
             }

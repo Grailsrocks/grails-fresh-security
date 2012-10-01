@@ -200,6 +200,11 @@ class FreshSecurityService implements InitializingBean {
             
         boolean confirmBypass = allowsBypass && userInfo.confirmBypass
         boolean confirmEmail = pluginConfig.confirm.email.on.signup && !confirmBypass
+
+        if (log.debugEnabled) {
+            log.debug "Accounts are locked until email confirmation? ${pluginConfig.account.locked.until.email.confirm}"
+        }
+
         boolean lockedUntilConfirmEmail = pluginConfig.account.locked.until.email.confirm && !confirmBypass
          
 		String password = encodePassword(identity, userInfo.password)
