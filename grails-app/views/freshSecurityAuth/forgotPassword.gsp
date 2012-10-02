@@ -1,10 +1,10 @@
 <html>
 	<head>
-		<title><g:message code="plugin.freshSecurity.forgot.password.screen.title"/></title>
+		<title><p:text code="forgot.password.screen.title"/></title>
         <theme:layout name="dialog"/>
 	</head>
 	<body>
-        <theme:title text="plugin.freshSecurity.forgot.password.form.title"/>
+        <theme:title text="forgot.password.form.title"/>
 	    <theme:zone name="body">
             <ui:displayMessage/>
 	        <fresh:forgotPasswordForm/>

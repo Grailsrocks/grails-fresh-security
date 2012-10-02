@@ -1,10 +1,10 @@
 <html>
 	<head>
-		<title><g:message code="plugin.freshSecurity.reset.password.screen.title"/></title>
+		<title><p:text code="reset.password.screen.title"/></title>
         <theme:layout name="dialog"/>
 	</head>
 	<body>
-        <theme:title text="plugin.freshSecurity.reset.password.form.title"/>
+        <theme:title text="reset.password.form.title"/>
 	    <theme:zone name="body">
 	        <fresh:resetPasswordForm/>
         </theme:zone>
