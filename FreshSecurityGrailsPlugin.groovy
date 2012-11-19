@@ -9,7 +9,7 @@ import com.grailsrocks.webprofile.security.*
 
 class FreshSecurityGrailsPlugin {
     // the plugin version
-    def version = "1.0.2-SNAPSHOT"
+    def version = "1.0.2-RC1"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.3.7 > *"
 
@@ -64,52 +64,38 @@ Security that "just works", backed by Spring Security
     }
 
     def doWithDynamicMethods = { ctx ->
-        
-        // @todo upgrade email conf plugin to use events mechanism, if app uses email conf too, it will break us unless
-        // they delegate to us as well if uid is "fresh.security.signup"
-        if (ctx.emailConfirmationService) {
-            ctx.emailConfirmationService.onConfirmation = { email, uid ->
-                log.info("User with id $uid has confirmed their email address $email")
-                // now do something…
-                // Then return a map which will redirect the user to this destination
-                return ctx.grailsApplication.config.plugin.freshSecurity.post.signup.url
-            }
-            ctx.emailConfirmationService.onInvalid = { uid -> 
-                log.warn("User with id $uid failed to confirm email address after 30 days")
-            }
-            ctx.emailConfirmationService.onTimeout = { email, uid -> 
-                log.warn("User with id $uid failed to confirm email address after 30 days")
-            }
-        }
     }
 
     def doWithConfigOptions = { 
-        'guest.roles'(defaultValue:['ROLE_GUEST'], validator: { v -> 
-            (v == null || !(v instanceof List)) ? 'A role list is required' : null
+        'guest.roles'(type:List, defaultValue:['ROLE_GUEST'], validator: { v -> 
+            (v == null) ? 'A role list is required' : null
         })
-        'default.roles'(defaultValue:['ROLE_USER'], validator: { v -> 
-            (v == null || !(v instanceof List)) ? 'A role list is required' : null
+        'default.roles'(type:List, defaultValue:['ROLE_USER'], validator: { v -> 
+            (v == null) ? 'A role list is required' : null
         })
         'signup.allowed'(defaultValue:true)
-        'signup.command.class.for.identity.mode.userid'(defaultValue:'com.grailsrocks.webprofile.security.forms.SignupWithUserIdFormCommand', validator: { v -> v ? null : 'A value is required'})
-        'signup.command.class.for.identity.mode.email'(defaultValue:'com.grailsrocks.webprofile.security.forms.SignupWithEmailFormCommand', validator: { v -> v ? null : 'A value is required'})
-        'remember.me.allowed'(defaultValue:true)
-        'confirm.email.on.signup'(defaultValue:false, validator: { v ->
+        'signup.command.class.for.identity.mode.userid'(type:String, defaultValue:'com.grailsrocks.webprofile.security.forms.SignupWithUserIdFormCommand', 
+            validator: { v -> v ? null : 'A value is required'})
+        'signup.command.class.for.identity.mode.email'(type:String, defaultValue:'com.grailsrocks.webprofile.security.forms.SignupWithEmailFormCommand', 
+            validator: { v -> v ? null : 'A value is required'})
+        'remember.me.allowed'(defaultValue:true, type:Boolean)
+        'confirm.email.on.signup'(defaultValue:false, type:Boolean, validator: { v ->
             if (v) {
                 def hasEmailConf = PluginManagerHolder.pluginManager.hasGrailsPlugin('email-confirmation')
-                return hasEmailConf ? null : 'Email-Confirmation plugin must be installed'
+                return hasEmailConf ? null : 'Email-Confirmation plugin must be installed for confirmations to be enabled'
             } else {
                 return null
             }
         })
-        'identity.mode'(defaultValue:'userid', validator: { v -> v in ['email', 'userid'] ? null : 'Must be [email] or [userid]'} )
-        'password.reset.mode'(defaultValue:'setnew', validator: { v -> v in ['setnew', 'generate'] ? null : 'Must be [setnew] or [generate]'})
-        'account.locked.until.email.confirm'(defaultValue:false)
-        'post.login.url'(defaultValue:[uri:'/'])
-        'post.signup.url'(defaultValue:[uri:'/'])
-        'bad.confirmation.url'(defaultValue:[uri:'/bad-confirmation'])
-        'user.object.class.name'(defaultValue:'')
-        'allow.confirm.bypass'(defaultValue:false, validator: { v -> (v instanceof Boolean) || (v instanceof Pattern) ? null : 'Must be boolean or Pattern'})
+        'identity.mode'(defaultValue:'userid', type:String, validator: { v -> v in ['email', 'userid'] ? null : 'Must be [email] or [userid]'} )
+        'password.reset.mode'(defaultValue:'setnew', type:String, validator: { v -> v in ['setnew', 'generate'] ? null : 'Must be [setnew] or [generate]'})
+        'account.locked.until.email.confirm'(defaultValue:false, type:Boolean)
+        'post.login.url'(defaultValue:[uri:'/'], type:Map)
+        'post.signup.url'(defaultValue:[uri:'/'], type:Map)
+        'bad.confirmation.url'(defaultValue:[uri:'/bad-confirmation'], type:Map)
+        'user.object.class.name'(defaultValue:'', type:String)
+        'allow.confirm.bypass'(defaultValue:false, type:Boolean)
+        'confirm.bypass.pattern'(defaultValue:null, type:Pattern)
     }
     
     def doWithConfig = { config ->
@@ -117,7 +103,7 @@ Security that "just works", backed by Spring Security
         application {
             // Get our config values and use them to apply to Spring security's config by
             // modifying global config
-            // This needs to be set as the default, that user can override using our config
+            // This needs to be set as the default, but user can override using sconfig
             grails.plugins.springsecurity.interceptUrlMap = [
                '/admin/**':     ['ROLE_ADMIN'],
                '/static/**':    ['IS_AUTHENTICATED_ANONYMOUSLY'],

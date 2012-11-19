@@ -35,6 +35,16 @@ events = {
      * @return Map of redirect() arguments. If empty or null, sends them to default post login page
      */
     'newUserConfirmedPage'(fork:false)
+
+    /*
+     * Sent when a user is about to be created, to determine if their account should bypass email confirmation.
+     * Only sent if allow.confirm.bypass config is set to true.
+     * 
+     * @param data The NewUserAccount instance passed originally to createNewUser/createNewUserWithObject
+     * @return Boolean value indicating whether or not bypass should occur. A null return indicates that the
+     * default behaviour defined by config should occur
+     */
+    'newUserCanBypassConfirmation'(fork:false)
     
     // Private events used internally to hook into email confirmation
     'new.user.confirmed'(namespace:'plugin.freshSecurity')

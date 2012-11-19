@@ -45,7 +45,7 @@ grails.project.dependency.resolution = {
         compile(':spring-security-core:1.2.6') 
         compile(':email-confirmation:2.0.6') 
         compile ":resources:1.2.RC2"
-
+/*
         runtime(':bootstrap-ui:1.0-SNAPSHOT') {
             excludes "svn"
         }
@@ -54,5 +54,6 @@ grails.project.dependency.resolution = {
             export = false
             excludes "spring-test"
         }
+*/
     }
 }
