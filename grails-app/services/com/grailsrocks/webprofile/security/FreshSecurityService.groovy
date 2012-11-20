@@ -236,7 +236,7 @@ class FreshSecurityService implements InitializingBean {
                 if (log.debugEnabled) {
                     log.debug "Application event callback said confirmation bypass should happen: ${appAllowsConfirm.value}"
                 }
-                confirmBypass &= appAllowsConfirm.value
+                confirmBypass = appAllowsConfirm.value
             }
 
             if (log.debugEnabled) {
@@ -246,7 +246,7 @@ class FreshSecurityService implements InitializingBean {
             lockedUntilConfirmEmail &= !confirmBypass
 
             // We're not going to confirm if bypassing, even if enabled
-            confirmEmail &= confirmBypass
+            confirmEmail &= !confirmBypass
 
             if (log.debugEnabled) {
                 log.debug "Finally, confirmation will be required?: ${confirmEmail} and account will be locked until confirmation: ${lockedUntilConfirmEmail}"
