@@ -60,6 +60,7 @@ Security that "just works", backed by Spring Security
         grailsSecurityBridge(com.grailsrocks.webprofile.security.FreshSecurityProvider) {
             springSecurityService = ref('springSecurityService')
             grailsApplication = ref('grailsApplication')
+            freshSecurityService = ref('freshSecurityService')
         }
     }
 

@@ -9,7 +9,8 @@ class FreshSecurityProvider implements SecurityBridge {
 
     def springSecurityService
     def grailsApplication
-    
+    def freshSecurityService
+
     String getProviderName() {
         "Fresh Security"
     }
@@ -42,6 +43,10 @@ class FreshSecurityProvider implements SecurityBridge {
             log.debug "Getting current user info, returning [${value}] (${value?.getClass()})"
         }
         return value
+    }
+
+    boolean userExists(identity) {
+        freshSecurityService.checkUserExists(identity)
     }
 
     boolean userHasRole(role) {

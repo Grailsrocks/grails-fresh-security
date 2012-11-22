@@ -34,6 +34,11 @@ class FreshSecurityService implements InitializingBean {
     }
 
     @Transactional
+    boolean checkUserExists(identity) {
+        findUserByIdentity(identity)
+    }
+
+    @Transactional
     def findUserByIdentity(identity) {
         userClass.findByIdentity(identity)
     }
@@ -188,6 +193,63 @@ class FreshSecurityService implements InitializingBean {
         return createNewUserWithObject(userInfo, null, request)
     }
     
+    boolean isConfirmationRequiredForNewUser(NewUserAccount userInfo) {
+        if (log.debugEnabled) {
+            log.debug "Email confirmation is required to create an account, establishing whether or not to bypass..."
+        }
+
+        if (!pluginConfig.allow.confirm.bypass) {
+            if (log.debugEnabled) {
+                log.debug "Email confirmation bypass is disabled in config. We're not going to think about this any more"
+            }
+            return true
+        }
+
+        boolean confirmBypass = false
+
+        println "cB: $confirmBypass"
+        if (log.debugEnabled) {
+            log.debug "Config says email confirmation bypass is permitted..."
+        }
+
+        // Is the config allowing certain email addresses to pass?
+        if (pluginConfig.confirm.bypass.pattern) { 
+            confirmBypass |= userInfo.identity ==~ pluginConfig.confirm.bypass.pattern
+            if (log.debugEnabled) {
+                log.debug "Config says email address ${userInfo.identity} should bypass confirmation: ${confirmBypass}"
+            }
+        }
+
+        println "cB 2: $confirmBypass"
+
+        // Is the app asking for us to allow the bypass?
+        confirmBypass |= (userInfo.confirmBypass ?: false)
+        if (log.debugEnabled) {
+            log.debug "Application supplied confirmation bypass requested: ${userInfo.confirmBypass} but permitted? ${confirmBypass}"
+        }
+
+        println "cB 3: $confirmBypass"
+
+        // See if the app wants to override this
+        def appAllowsConfirm = event(topic:'newUserCanBypassConfirmation', namespace:FreshSecurityService.PLUGIN_EVENT_NAMESPACE, 
+            fork:false, data:userInfo)
+        if (appAllowsConfirm.value != null) {
+            if (log.debugEnabled) {
+                log.debug "Application event callback said confirmation bypass should happen: ${appAllowsConfirm.value}"
+            }
+            confirmBypass = appAllowsConfirm.value
+        }
+
+        println "cB 4: $confirmBypass"
+
+        if (log.debugEnabled) {
+            log.debug "Accounts are locked until email confirmation? ${pluginConfig.account.locked.until.email.confirm}"
+        }
+
+        // We're not going to confirm if bypassing, even if enabled
+        return !confirmBypass
+    }
+
     @Transactional
     def createNewUserWithObject(NewUserAccount userInfo, userObject, request = null) {
         def identity = userInfo.identity
@@ -200,58 +262,20 @@ class FreshSecurityService implements InitializingBean {
             log.debug "Accounts are locked until email confirmation? ${lockedUntilConfirmEmail}"
         }
 
-        boolean confirmEmail = pluginConfig.confirm.email.on.signup
-        boolean confirmBypass = false
+        boolean confirmEmailEnabled = pluginConfig.confirm.email.on.signup
+        boolean confirmEmail = confirmEmailEnabled
+        boolean confirmBypass
         
         // Not worth even checking bypass stuff if its not enabled
-        if (confirmEmail) {
-            if (log.debugEnabled) {
-                log.debug "Email confirmation is required to create an account"
-            }
-
-            confirmBypass = pluginConfig.allow.confirm.bypass
-
-            if (log.debugEnabled) {
-                log.debug "Config says email confirmation bypass is permitted: ${confirmBypass}"
-            }
-
-            // Is the config allowing certain email addresses to pass?
-            if (pluginConfig.confirm.bypass.pattern) { 
-                confirmBypass &= userInfo.identity ==~ pluginConfig.confirm.bypass.pattern
-                if (log.debugEnabled) {
-                    log.debug "Config says email address ${userInfo.identity} is allowed to bypass confirmation: ${confirmBypass}"
-                }
-            }
-
-            // Is the app asking for us to allow the bypass?
-            confirmBypass &= userInfo.confirmBypass
-            if (log.debugEnabled) {
-                log.debug "Application supplied confirmation bypass requested: ${userInfo.confirmBypass} but permitted? ${confirmBypass}"
-            }
-
-            // See if the app wants to override this
-            def appAllowsConfirm = event(topic:'newUserCanBypassConfirmation', namespace:FreshSecurityService.PLUGIN_EVENT_NAMESPACE, 
-                fork:false, data:userInfo)
-            if (appAllowsConfirm.value != null) {
-                if (log.debugEnabled) {
-                    log.debug "Application event callback said confirmation bypass should happen: ${appAllowsConfirm.value}"
-                }
-                confirmBypass = appAllowsConfirm.value
-            }
-
-            if (log.debugEnabled) {
-                log.debug "Accounts are locked until email confirmation? ${pluginConfig.account.locked.until.email.confirm}"
-            }
-
-            lockedUntilConfirmEmail &= !confirmBypass
-
-            // We're not going to confirm if bypassing, even if enabled
-            confirmEmail &= !confirmBypass
-
-            if (log.debugEnabled) {
-                log.debug "Finally, confirmation will be required?: ${confirmEmail} and account will be locked until confirmation: ${lockedUntilConfirmEmail}"
-            }
+        if (confirmEmailEnabled) {
+            confirmEmail = isConfirmationRequiredForNewUser(userInfo)
         }
+
+        if (log.debugEnabled) {
+            log.debug "Finally, confirmation will be required?: ${confirmEmail} and account will be locked until confirmation: ${lockedUntilConfirmEmail}"
+        }
+
+        lockedUntilConfirmEmail &= confirmEmail
 
 		String password = encodePassword(identity, userInfo.password)
 		

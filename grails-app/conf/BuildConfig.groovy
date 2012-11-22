@@ -38,9 +38,10 @@ grails.project.dependency.resolution = {
             export = false
         }
 
-        compile(':platform-core:1.0.M7-SNAPSHOT') {
+        compile(':platform-core:1.0.RC1') {
             excludes "spring-test"
         }
+
         compile(':platform-ui:1.0.M1-SNAPSHOT') 
         compile(':spring-security-core:1.2.6') 
         compile(':email-confirmation:2.0.6') 
