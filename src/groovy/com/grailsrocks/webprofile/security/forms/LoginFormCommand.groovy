@@ -10,8 +10,6 @@ class LoginFormCommand {
     String password
     Boolean rememberMe
 
-    def freshSecurityService
-
     static constraints = {
         identity(maxSize: 40, blank: false)
     	password(blank: false, minSize: 8, maxSize: 64, validator: CustomValidators.passwordStrength)
